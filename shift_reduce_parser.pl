@@ -7,18 +7,19 @@
 :- use_module(entries, []).
 :- use_module(symbol, []).
 :- use_module(action, []).
+:- use_module(ast, []).
 
 %% parse(+Parser, +Tokens, ?Result).
 % Bottom-up shift-reduce parser
 %
 parse_tokens(Parser, Tokens, Program) :-
-	empty_assoc(AST),
+    ast:empty(AST),
 	foldl(parse_token, Tokens, program(Parser, AST), Program).
 
-parse_token(SymbolIndex-Data,
-			program(parser(Grammar, Tables, State), AST),
-			program(parser(Grammar, Tables, NewState), NewAST)
-		   ) :-
+parse_token(Token, P0, PN) :-
+	Token = SymbolIndex-Data,
+	P0 = program(parser(Grammar, Tables, State), AST),
+	PN = program(parser(Grammar, Tables, NewState), NewAST),
 	lalr:current(Tables, State, Lalr),
 	symbol:by_type(Tables, SymbolType, SymbolIndex, Symbol),
 	symbol:type(SymbolType, SymbolTypeName),
@@ -29,10 +30,20 @@ parse_token(SymbolIndex-Data,
 	;	entries:list(Lalr, Actions),
 		action:find(Actions, SymbolIndex, Action),
 		format('action: ~p~n~n', [Action]),
+		get_assoc(action, Action, ActionType),
+		action:type(ActionType, ActionName),
 		get_assoc(target, Action, Target),
-		state:merge(State, [lalr-Target], NewState),
-		NewAST = AST
+		next_action(Token, Target, ActionName, P0, PN)
 	).
+
+next_action(Token, Target, shift,
+			program(parser(Grammar, Tables, State0), AST0),
+			program(parser(Grammar, Tables, StateN), ASTN)) :-
+	!,
+	state:merge(State0, [lalr-Target], StateN),
+	ast:push(AST0, Token, ASTN).
+
+next_action(_, _, _, P, P).
 
 %% parse(+S, ?Result) parses input string S,
 % where Result is a list of categories to which it reduces.
