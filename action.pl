@@ -1,6 +1,6 @@
 :- module(action, [type/2, find/3]).
 
-:- use_module(entries).
+:- use_module(entries, []).
 
 %% This action indicates the symbol is to be shifted.
 % The Target field will contain the index of the state

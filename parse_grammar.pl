@@ -1,6 +1,6 @@
 :- module(parse_grammar, [create_parser/2]).
 
-:- use_module(entries).
+:- use_module(entries, []).
 
 create_parser(Grammar, parser(Grammar, Tables, State)) :-
 	Grammar = grammar(_Header, Assoc),

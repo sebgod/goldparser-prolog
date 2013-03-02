@@ -11,6 +11,9 @@
 	safe_open_file(+, 1),
 	safe_open_file(+, 1, +).
 
+:- predicate_options(safe_open_file/3, 3,
+					 [ encoding(encoding), type(oneof([text, binary])), pass_to(open/4, 4) ]).
+
 must_be_assoc(Term) :-
 	(	var(Term) ; \+ is_assoc(Term)),
 	type_error(assoc, Term).
@@ -37,6 +40,7 @@ assoc_append_list(PrevAssoc, Key, Value, NewAssoc) :-
 	;   NewValue = [Value]
 	),
 	put_assoc(Key, PrevAssoc, NewValue, NewAssoc).
+
 safe_open_file(File, StreamParser) :-
 	safe_open_file(File, StreamParser, [type(binary)]).
 

@@ -5,10 +5,10 @@
 				 ]).
 
 :- use_module(support).
-:- use_module(table).
-:- use_module(state).
-:- use_module(dfa).
-:- use_module(symbol).
+:- use_module(table, []).
+:- use_module(state, []).
+:- use_module(dfa, []).
+:- use_module(symbol, []).
 
 scan_file(Parser, Tokens, File) :-
 	safe_open_file(File, scan_stream(Parser, Tokens), [encoding(utf8)]).
@@ -39,7 +39,7 @@ eat_token(parser(G, Tables, State), Token) -->
 	},
 	(	 [Input],
 		 { char_and_code(Input, Char, Code),
-		   find_edge(Tables, DFA, Code, TargetIndex)
+		   dfa:find_edge(Tables, DFA, Code, TargetIndex)
 		 }
 	->	 { table:item(dfa_table, Tables, TargetIndex, TargetDFA),
 		   dfa:accept(TargetDFA, Accept),

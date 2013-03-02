@@ -3,7 +3,8 @@
 		 by_type/4
 	]).
 
-:- use_module(table).
+:- use_module(table, []).
+
 %%  Normal Nonterminal
 type(0, nonterminal).
 %%	Normal Terminal
