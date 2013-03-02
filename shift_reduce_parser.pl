@@ -4,6 +4,7 @@
 							   ]).
 
 :- use_module(lalr).
+:- use_module(entries).
 :- use_module(action).
 
 %% parse(+Parser, +Tokens, ?Result).
@@ -19,6 +20,9 @@ parse_token(SymbolIndex-Data,
 		   ) :-
 	lalr:current(Tables, State, Lalr),
 	format('~p: ~p ~p~n', [SymbolIndex, Data, Lalr]),
+	entries:list(Lalr, Actions),
+	action:find(Actions, SymbolIndex, Action),
+	format('action: ~p~n', [Action]),
 	NewState = State,
 	NewAST = AST.
 

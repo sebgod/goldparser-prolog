@@ -1,6 +1,6 @@
 :- module(parse_grammar, [create_parser/2]).
 
-:- use_module(parser_members).
+:- use_module(entries).
 
 create_parser(Grammar, parser(Grammar, Tables, State)) :-
 	Grammar = grammar(_Header, Assoc),
@@ -26,7 +26,7 @@ create_tables(Assoc, [Name-Size | Rest], Tables0, Tables) :-
 			member(Item, Items),
 			(   get_assoc(index, Item, Index),
 				Index1 is Index+1,
-				(	entries(Item, Entries)
+				(	entries:list(Item, Entries)
 				->	EntriesTerm =.. [entries | Entries],
 					put_assoc('_entries', Item, EntriesTerm, Item1)
 				;	Item1 = Item

@@ -5,7 +5,7 @@
 				 ]).
 
 :- use_module(support).
-:- use_module(parser_members).
+:- use_module(table).
 :- use_module(state).
 :- use_module(dfa).
 :- use_module(symbol).
@@ -23,8 +23,8 @@ scan_list(parser(G, T, State), Tokens, Input) :-
 
 scan_list_(parser(_G, Tables, _S), [Index-''], []) :-
 	!,
-	symbol_type(Kind, eof),
-	once(symbols_of_kind(Tables, Kind, Index, _)).
+	symbol:type(Kind, eof),
+	once(symbol:by_type(Tables, Kind, Index, _)).
 
 scan_list_(Parser, [ Token | TRest ], Input) :-
 	phrase(eat_token(Parser, Token), Input, IRest),
@@ -41,8 +41,8 @@ eat_token(parser(G, Tables, State), Token) -->
 		 { char_and_code(Input, Char, Code),
 		   find_edge(Tables, DFA, Code, TargetIndex)
 		 }
-	->	 { table_item(dfa_table, Tables, TargetIndex, TargetDFA),
-		   dfa_accept(TargetDFA, Accept),
+	->	 { table:item(dfa_table, Tables, TargetIndex, TargetDFA),
+		   dfa:accept(TargetDFA, Accept),
 		   atom_concat(Chars0, Char, Chars),
 		   state:merge(State,
 					   [chars-Chars,

@@ -5,14 +5,14 @@
 				  merge/3
 				 ]).
 
-:- use_module(parser_members).
+:- use_module(table).
 
 :- meta_predicate
 	merge_(+, +, ?).
 
 current_item(Tables, State, Name-Table, Item) :-
 	current(State, Name-Index),
-	table_item(Table, Tables, Index, Item).
+	table:item(Table, Tables, Index, Item).
 
 current(State, Kind-KindState) :-
 	get_assoc(Kind, State, KindState).
