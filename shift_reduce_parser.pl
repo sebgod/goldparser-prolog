@@ -43,7 +43,10 @@ next_action(Token, Target, shift,
 	state:merge(State0, [lalr-Target], StateN),
 	ast:push(AST0, Token, ASTN).
 
-next_action(_, _, _, P, P).
+next_action(Token, Target, ActionName,
+			program(P, AST0),
+			program(P, ASTN)) :-
+	ast:push(AST0, ActionName-(Token, Target), ASTN).
 
 %% parse(+S, ?Result) parses input string S,
 % where Result is a list of categories to which it reduces.
