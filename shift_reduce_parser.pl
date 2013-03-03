@@ -10,7 +10,7 @@
 % Bottom-up shift-reduce parser
 %
 parse_tokens(Parser, Tokens, Program) :-
-    ast:empty(AST),
+	ast:empty(AST),
 	foldl(parse_token, Tokens, program(Parser, AST), Program).
 
 parse_token(Token, P0, PN) :-
