@@ -26,11 +26,11 @@ parse_token(P0, PN) -->
     next(P0, ActionName, Target),
     perform(ActionName, Target, P0, PN).
 
-next(program(parser(_Grammar, Tables, State), _AST),
+next(program(parser(_Grammar, Tables, State), AST),
      ActionName, Target,
      Tokens, Tokens
     ) :-
-    [SymbolIndex-Data | _] = Tokens,
+    peek(AST, Tokens, SymbolIndex-Data),
     lalr:current(Tables, State, Lalr),
     symbol:by_type(Tables, SymbolType, SymbolIndex, Symbol),
     symbol:type(SymbolType, SymbolTypeName),
@@ -45,6 +45,12 @@ next(program(parser(_Grammar, Tables, State), _AST),
     item:get(name, Symbol, SymbolName),
     format('a: ~p s: ~p a: ~p~n',
            [ActionName, SymbolTypeName-(SymbolName, Data), Action]).
+
+peek(_AST, Tokens, SymbolIndex-Data) :-
+    [SymbolIndex-Data | _] = Tokens, !.
+
+peek(AST, _Tokens, SymbolIndex-Data) :-
+    ast:peek(AST, SymbolIndex-Data).
 
 perform(skip, _, P, P, [_SkippedToken | TokenR], TokenR).
 
@@ -62,20 +68,21 @@ perform(reduce, Target,
         [Token | TokenR], TokenR
        ) :-
     P = parser(_, Tables, _),
-    %ast:push(AST0, Token, ASTN),
-    ASTN = AST0,
     table:item(rule_table, Tables, Target, Rule),
-    format('reduce token: ~p rule: ~p~n', [Token, Rule]).
+    item:get(head_index, Rule, HeadIndex),
+    symbol:by_type(Tables, nonterminal, HeadIndex, Head),
+    ast:push(AST0, HeadIndex-production, ASTN),
+    format('reduce token: ~p rule: ~p head: ~p~n', [Token, Rule, Head]).
 
 perform(goto, Target,
-        program(P, AST0), program(P, ASTN),
-        [Token | TokenR], TokenR
+        program(parser(Grammar, Tables, State0), AST0),
+        program(parser(Grammar, Tables, StateN), ASTN),
+        Tokens, Tokens
        ) :-
-    P = parser(_, Tables, _),
-    %ast:push(AST0, Token, ASTN),
+    state:merge(State0, [lalr-Target], StateN),
     ASTN = AST0,
-    table:item(rule_table, Tables, Target, Rule),
-    format('goto token: ~p rule: ~p~n', [Token, Rule]).
+    table:item(lalr_table, Tables, Target, Lalr),
+    format('goto lalr state: ~p~n', [Lalr]).
 
 perform(accept, _,
         program(parser(Grammar, Tables, State0), AST0),
