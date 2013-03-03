@@ -25,8 +25,10 @@ type(3, goto).
 type(4, accept).
 
 find(Actions, SymbolIndex, Action) :-
-	once(( entries:iterate(Actions, Action, _ActionIndex),
-		   get_assoc(symbol_index, Action, SymbolIndex)
-		 )
-		).
+	once(
+		(
+			entries:iterate(Actions, Action, _ActionIndex),
+			get_assoc(symbol_index, Action, SymbolIndex)
+		)
+	).
 
