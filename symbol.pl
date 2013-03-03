@@ -4,6 +4,7 @@
         ]).
 
 :- use_module(table, []).
+:- use_module(item, []).
 
 %%    type(+Number:int, +Name:atom) is det.
 %%    type(?Number:int, ?Name:atom) is nondet.
@@ -45,4 +46,4 @@ type(7, error).
 
 by_type(Tables, Kind, SymbolIndex, Symbol) :-
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
-    get_assoc(kind, Symbol, Kind).
+    item:get(kind, Symbol, Kind).

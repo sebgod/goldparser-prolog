@@ -1,9 +1,9 @@
-:- module(parse_grammar, [create_parser/2]).
+:- module(parse_grammar, [parser/2]).
 
 :- use_module(library(assoc)).
-:- use_module(entries, []).
+:- use_module(item, []).
 
-create_parser(Grammar, parser(Grammar, Tables, State)) :-
+parser(Grammar, parser(Grammar, Tables, State)) :-
     Grammar = grammar(_Header, Assoc),
     create_tables(Assoc, Tables),
     get_assoc(initial_states, Assoc, [State]).
@@ -27,9 +27,8 @@ create_tables(Assoc, [Name-Size | Rest], Tables0, Tables) :-
             member(Item, Items),
             (   get_assoc(index, Item, Index),
                 Index1 is Index+1,
-                (    entries:list(Item, Entries)
-                ->    EntriesTerm =.. [entries | Entries],
-                    put_assoc('_entries', Item, EntriesTerm, Item1)
+                (    item:get_entries(Item, Entries)
+                ->   item:set_entries(Item, Entries, Item1)
                 ;    Item1 = Item
                 ),
             % if only using setarg, it will get out of local stack

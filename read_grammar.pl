@@ -1,6 +1,6 @@
 :- module(read_grammar, [
-						 read_grammar_file/2,
-						 read_grammar_stream/2
+						 read_file/2,
+						 read_stream/2
 						]).
 
 :- use_module(read_multitype).
@@ -8,10 +8,10 @@
 :- use_module(library(assoc)).
 :- use_module(support).
 
-read_grammar_file(Grammar, File) :-
-	safe_open_file(File, read_grammar_stream(Grammar)).
+read_file(Grammar, File) :-
+	safe_open_file(File, read_stream(Grammar)).
 
-read_grammar_stream(grammar(Header, Assoc), Stream) :-
+read_stream(grammar(Header, Assoc), Stream) :-
 	read_header(Stream, Header),
 	empty_assoc(Empty),
 	read_structures(Stream, Empty, Assoc).

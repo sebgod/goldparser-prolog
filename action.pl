@@ -1,6 +1,6 @@
 :- module(action, [type/2, find/3]).
 
-:- use_module(entries, []).
+:- use_module(item, []).
 
 %%    type(+Number:int, +Name:atom) is det.
 %%    type(?Number:int, ?Name:atom) is nondet.
@@ -31,10 +31,7 @@ type(4, accept).
 
 
 find(Actions, SymbolIndex, Action) :-
-    once(
-        (
-            entries:iterate(Actions, Action, _ActionIndex),
-            get_assoc(symbol_index, Action, SymbolIndex)
-        )
-    ).
+    once((item:entries(Actions, Action, _ActionIndex),
+          item:get(symbol_index, Action, SymbolIndex)
+        )).
 
