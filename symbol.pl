@@ -1,7 +1,7 @@
 :- module(symbol, [
-         type/2,
-		 by_type/4
-	]).
+		type/2,
+		by_type/4
+		]).
 
 :- use_module(table, []).
 
