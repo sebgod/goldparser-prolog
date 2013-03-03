@@ -10,42 +10,42 @@
 % Bottom-up shift-reduce parser
 %
 parse_tokens(Parser, Tokens, Program) :-
-	ast:empty(AST),
-	foldl(parse_token, Tokens, program(Parser, AST), Program).
+    ast:empty(AST),
+    foldl(parse_token, Tokens, program(Parser, AST), Program).
 
 parse_token(Token, P0, PN) :-
-	Token = SymbolIndex-Data,
-	P0 = program(parser(Grammar, Tables, State), AST),
-	PN = program(parser(Grammar, Tables, NewState), NewAST),
-	lalr:current(Tables, State, Lalr),
-	symbol:by_type(Tables, SymbolType, SymbolIndex, Symbol),
-	symbol:type(SymbolType, SymbolTypeName),
-	format('~p [~p]: ~p ~n', [Symbol, SymbolTypeName, Data]),
-	(	SymbolTypeName = noise
-	->	NewState = State,
-		NewAST = AST
-	;	entries:list(Lalr, Actions),
-		action:find(Actions, SymbolIndex, Action),
-		format('action: ~p~n~n', [Action]),
-		get_assoc(action, Action, ActionType),
-		action:type(ActionType, ActionName),
-		get_assoc(target, Action, Target),
-		next_action(Token, Target, ActionName, P0, PN)
-	).
+    Token = SymbolIndex-Data,
+    P0 = program(parser(Grammar, Tables, State), AST),
+    PN = program(parser(Grammar, Tables, NewState), NewAST),
+    lalr:current(Tables, State, Lalr),
+    symbol:by_type(Tables, SymbolType, SymbolIndex, Symbol),
+    symbol:type(SymbolType, SymbolTypeName),
+    format('~p [~p]: ~p ~n', [Symbol, SymbolTypeName, Data]),
+    (    SymbolTypeName = noise
+    ->    NewState = State,
+        NewAST = AST
+    ;    entries:list(Lalr, Actions),
+        action:find(Actions, SymbolIndex, Action),
+        format('action: ~p~n~n', [Action]),
+        get_assoc(action, Action, ActionType),
+        action:type(ActionType, ActionName),
+        get_assoc(target, Action, Target),
+        next_action(Token, Target, ActionName, P0, PN)
+    ).
 
 next_action(Token, Target, shift,
-			program(parser(Grammar, Tables, State0), AST0),
-			program(parser(Grammar, Tables, StateN), ASTN)) :-
-	!,
-	state:merge(State0, [lalr-Target], StateN),
-	ast:push(AST0, Token, ASTN).
+            program(parser(Grammar, Tables, State0), AST0),
+            program(parser(Grammar, Tables, StateN), ASTN)) :-
+    !,
+    state:merge(State0, [lalr-Target], StateN),
+    ast:push(AST0, Token, ASTN).
 
 
 
 next_action(Token, Target, ActionName,
-			program(P, AST0),
-			program(P, ASTN)) :-
-	ast:push(AST0, ActionName-(Token, Target), ASTN).
+            program(P, AST0),
+            program(P, ASTN)) :-
+    ast:push(AST0, ActionName-(Token, Target), ASTN).
 
 %% parse(+S, ?Result) parses input string S,
 % where Result is a list of categories to which it reduces.
@@ -57,22 +57,22 @@ parse(S, Result) :- shift_reduce(S,[],Result).
 shift_reduce([],Result,Result) :- !.
 
 shift_reduce(S,Stack,Result):-
-	shift(Stack,S, NStack,S1), %fails if S = []
-	reduce(NStack,ReducedStack),
-	shift_reduce(S1,ReducedStack,Result).
+    shift(Stack,S, NStack,S1), %fails if S = []
+    reduce(NStack,ReducedStack),
+    shift_reduce(S1,ReducedStack,Result).
 
 
-	% shift(+Stack,+S,-NStack,-NS) shift 1st elem from S onto Stack.
-	%
+    % shift(+Stack,+S,-NStack,-NS) shift 1st elem from S onto Stack.
+    %
 shift(X,[H|Y],[H|X],Y).
 
 %% reduce(+Stack,ReducedStack) repeatedly reduce beginning of
 % Stack to form fewer, larger constituents.
 %
 reduce(Stack,ReducedStack):-
-	brule(Stack, Stack1),
-	!,
-	reduce(Stack1, ReducedStack).
+    brule(Stack, Stack1),
+    !,
+    reduce(Stack1, ReducedStack).
 
 reduce(Stack,Stack).
 

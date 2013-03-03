@@ -2,8 +2,8 @@
 
 :- use_module(entries, []).
 
-%%	type(+Number:int, +Name:atom) is det.
-%%	type(?Number:int, ?Name:atom) is nondet.
+%%    type(+Number:int, +Name:atom) is det.
+%%    type(?Number:int, ?Name:atom) is nondet.
 %
 % shift: This action indicates the symbol is to be shifted.
 % The Target field will contain the index of the state
@@ -31,10 +31,10 @@ type(4, accept).
 
 
 find(Actions, SymbolIndex, Action) :-
-	once(
-		(
-			entries:iterate(Actions, Action, _ActionIndex),
-			get_assoc(symbol_index, Action, SymbolIndex)
-		)
-	).
+    once(
+        (
+            entries:iterate(Actions, Action, _ActionIndex),
+            get_assoc(symbol_index, Action, SymbolIndex)
+        )
+    ).
 

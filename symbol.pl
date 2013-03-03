@@ -1,12 +1,12 @@
 :- module(symbol, [
-		type/2,
-		by_type/4
-		]).
+        type/2,
+        by_type/4
+        ]).
 
 :- use_module(table, []).
 
-%%	type(+Number:int, +Name:atom) is det.
-%%	type(?Number:int, ?Name:atom) is nondet.
+%%    type(+Number:int, +Name:atom) is det.
+%%    type(?Number:int, ?Name:atom) is nondet.
 %
 % Represents the symbol types used in the gold parser version 5.0
 %
@@ -44,5 +44,5 @@ type(7, error).
 
 
 by_type(Tables, Kind, SymbolIndex, Symbol) :-
-	table:items(symbol_table, Tables, SymbolIndex, Symbol),
-	get_assoc(kind, Symbol, Kind).
+    table:items(symbol_table, Tables, SymbolIndex, Symbol),
+    get_assoc(kind, Symbol, Kind).
