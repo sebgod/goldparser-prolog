@@ -1,7 +1,4 @@
-:- module(shift_reduce_parser, [
-								parse_tokens/3,
-								parse_token/3
-							   ]).
+:- module(shift_reduce_parser, [parse_tokens/3, parse_token/3]).
 
 :- use_module(lalr, []).
 :- use_module(entries, []).
@@ -42,6 +39,8 @@ next_action(Token, Target, shift,
 	!,
 	state:merge(State0, [lalr-Target], StateN),
 	ast:push(AST0, Token, ASTN).
+
+
 
 next_action(Token, Target, ActionName,
 			program(P, AST0),
