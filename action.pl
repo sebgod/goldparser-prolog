@@ -1,4 +1,4 @@
-:- module(action, [type/2, find/3]).
+:- module(action, [type/2, find/3, list/2]).
 
 :- use_module(item, []).
 
@@ -34,4 +34,7 @@ find(Actions, SymbolIndex, Action) :-
     once((item:entries(Actions, Action, _ActionIndex),
           item:get(symbol_index, Action, SymbolIndex)
         )).
+
+list(Actions, List) :-
+    item:entries_to_list(Actions, List).
 

@@ -1,18 +1,19 @@
 :- module(shift_reduce_parser, [parse_tokens/3, parse_token/4]).
 
+:- use_module(state, []).
 :- use_module(lalr, []).
 :- use_module(item, []).
 :- use_module(table, []).
 :- use_module(symbol, []).
 :- use_module(action, []).
-:- use_module(ast, []).
+:- use_module(stack, []).
 
 %% parse(+Parser, +Tokens, ?Result) is det.
 %
 % Bottom-up shift-reduce parser.
 %
 parse_tokens(Parser, Tokens, Program) :-
-    ast:empty(AST),
+    stack:empty(AST),
     phrase(parse_tokens(program(Parser, AST), Program), Tokens, []).
 
 parse_tokens(Program0, ProgramN) -->
@@ -24,33 +25,42 @@ parse_tokens(Program, Program) --> [].
 
 parse_token(P0, PN) -->
     next(P0, ActionName, Target),
+    {format('~p~n', perform(ActionName, Target))},
     perform(ActionName, Target, P0, PN).
 
 next(program(parser(_Grammar, Tables, State), AST),
      ActionName, Target,
      Tokens, Tokens
     ) :-
-    peek(AST, Tokens, SymbolIndex-Data),
+    state:current(State, lalr-LalrIndex),
     lalr:current(Tables, State, Lalr),
-    symbol:by_type(Tables, SymbolType, SymbolIndex, Symbol),
+    (   stack:peek(AST, Top)
+    ->  TOS = Top
+    ;   TOS = none
+    ),
+    format('peek [~p] current: ~p | ~p top: ~p~n\tlalr: ~p~n~n',
+           [LalrIndex, AST, Tokens, TOS, Lalr]),
+    peek(AST, Tokens, SymbolIndex-_Data),
+    symbol:by_type(Tables, SymbolType, SymbolIndex, _Symbol),
     symbol:type(SymbolType, SymbolTypeName),
     (   SymbolTypeName = noise
     ->  ActionName = skip
     ;   item:get_entries(Lalr, Actions),
-        action:find(Actions, SymbolIndex, Action),
-        item:get(action, Action, ActionType),
+        (   action:find(Actions, SymbolIndex, Action)
+        ->  FoundAction = Action
+        ;   action:list(Actions, [FoundAction])
+        ),
+        item:get(action, FoundAction, ActionType),
         action:type(ActionType, ActionName),
-        item:get(target, Action, Target)
-    ),
-    item:get(name, Symbol, SymbolName),
-    format('a: ~p s: ~p a: ~p~n',
-           [ActionName, SymbolTypeName-(SymbolName, Data), Action]).
+        item:get(target, FoundAction, Target),
+        format('[~p] -> [~p] ~p~n~n',
+               [LalrIndex, Target, FoundAction])
+    ).
 
 peek(_AST, Tokens, SymbolIndex-Data) :-
-    [SymbolIndex-Data | _] = Tokens, !.
-
+    [SymbolIndex-Data | _] = Tokens.
 peek(AST, _Tokens, SymbolIndex-Data) :-
-    ast:peek(AST, SymbolIndex-Data).
+    stack:peek(AST, SymbolIndex-Data).
 
 perform(skip, _, P, P, [_SkippedToken | TokenR], TokenR).
 
@@ -61,33 +71,40 @@ perform(shift, Target,
        ) :-
     !,
     state:merge(State0, [lalr-Target], StateN),
-    ast:push(AST0, Token, ASTN).
+    stack:push(AST0, Token, ASTN),
+    format('shift\t~p | ~p~n~n', [ASTN, TokenR]).
 
 perform(reduce, Target,
         program(P, AST0), program(P, ASTN),
-        [Token | TokenR], TokenR
+        TokenR, TokenR
        ) :-
     P = parser(_, Tables, _),
     table:item(rule_table, Tables, Target, Rule),
     item:get(head_index, Rule, HeadIndex),
     symbol:by_type(Tables, nonterminal, HeadIndex, Head),
-    ast:push(AST0, HeadIndex-production, ASTN),
-    format('reduce token: ~p rule: ~p head: ~p~n', [Token, Rule, Head]).
+    (   item:get_entries(Rule, RuleEntries)
+    ->  RuleSymbols = RuleEntries
+    ;   RuleSymbols = []
+    ),
+    item:entry_size(RuleSymbols, RuleSymbolSize),
+    functor(Production, p, RuleSymbolSize),
+    stack:push(AST0, HeadIndex-Production, ASTN),
+    format('reduce\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
+           [ASTN, TokenR, Rule, Head]).
 
 perform(goto, Target,
-        program(parser(Grammar, Tables, State0), AST0),
-        program(parser(Grammar, Tables, StateN), ASTN),
+        program(parser(Grammar, Tables, State0), AST),
+        program(parser(Grammar, Tables, StateN), AST),
         Tokens, Tokens
        ) :-
     state:merge(State0, [lalr-Target], StateN),
-    ASTN = AST0,
     table:item(lalr_table, Tables, Target, Lalr),
-    format('goto lalr state: ~p~n', [Lalr]).
+    format('goto\t~p | ~p~n\ttarget state: [~p] ~p~n~n', [AST, Tokens, Target, Lalr]).
 
 perform(accept, _,
         program(parser(Grammar, Tables, State0), AST0),
         program(parser(Grammar, Tables, StateN), ASTN),
-        [Token], []) :-
+        Tokens, Tokens) :-
     state:merge(State0, [accept-true], StateN),
     ASTN = AST0,
-    format('accepted: ~p~n~n', [Token]).
+    format('accepted\t~p~n~n', [ASTN]).
