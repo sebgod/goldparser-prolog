@@ -11,7 +11,7 @@ get(Name, Item, Value) :-
     get_assoc(Name, Item, Value).
 get_entries(Item, Entries) :-
     get('_entries', Item, Entries).
-    
+
 set(Name, Item, Value, NewItem) :-
     put_assoc(Name, Item, Value, NewItem).
 
@@ -28,7 +28,7 @@ entries(Entries, Entry, EntryIndex) :-
     EntryIndex is ArgIndex - 1.
 
 entry_size(Entries, Size) :-
-    functor(Entries, _, Size), !.
+    functor(Entries, entries, Size), !.
 
 entry_size(Entries, Size) :-
     length(Entries, Size), !.
