@@ -1,5 +1,7 @@
 :- module(portray_grammar, []).
 
+:- use_module(library(assoc)).
+
 user:portray(parser(Grammar, Tables, _)) :-
 	Grammar = grammar(header(Header), Assoc),
 	format('Version: ~w~n', [Header]),
