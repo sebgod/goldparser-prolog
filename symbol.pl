@@ -1,6 +1,8 @@
-:- module(symbol, [
-        type/2,
-        by_type/4
+:- module(symbol,
+          [
+           type/2,
+           constant/2,
+           by_type/4
         ]).
 
 :- use_module(table, []).
@@ -43,7 +45,10 @@ type(5, ground_end).
 type(6, decremented).
 type(7, error).
 
+constant(Kind, Constant) :- type(Kind, _), Constant = Kind.
+constant(Kind, Constant) :- type(Constant, Kind).
 
 by_type(Tables, Kind, SymbolIndex, Symbol) :-
+    constant(Kind, Constant),
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
-    item:get(kind, Symbol, Kind).
+    item:get(kind, Symbol, Constant).
