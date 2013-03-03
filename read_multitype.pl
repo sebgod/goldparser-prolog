@@ -39,7 +39,7 @@ structure_type_db('S', symbol_table,
 structure_type_db('R', rule_table,
 				  [
 				   (index, short),
-				   (non_terminal, short)
+				   (head_index, short)
 				  ]).
 structure_type_db('D', dfa_table,
 				  [
