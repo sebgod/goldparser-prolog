@@ -8,9 +8,6 @@
 :- use_module(table, []).
 :- use_module(item, []).
 
-:- meta_predicate
-    merge_(+, +, ?).
-
 current_item(Tables, State, Name-Table, Item) :-
     current(State, Name-Index),
     table:item(Table, Tables, Index, Item).
@@ -21,10 +18,11 @@ current(State, Kind-KindState) :-
 current_list(State, List) :-
     maplist(current(State), List).
 
-merge(State, Updates, NewState) :-
-    foldl(merge_, Updates, State, NewState).
-
+% for now, SWI prolog xref is broken, and will not detect this call
 merge_(Kind-KindState, State, NewState) :-
     item:set(Kind, State, KindState, NewState).
+
+merge(State, Updates, NewState) :-
+    foldl(merge_, Updates, State, NewState).
 
 
