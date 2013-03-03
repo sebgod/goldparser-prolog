@@ -1,6 +1,4 @@
-:- module(ast, [
-				empty/1
-			   ,push/3]).
+:- module(ast, [empty/1 ,push/3]).
 
 empty(ast([], [])).
 
