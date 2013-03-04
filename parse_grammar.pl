@@ -1,7 +1,7 @@
 :- module(parse_grammar, [parser/2]).
 
 :- use_module(library(assoc)).
-:- use_module(item, []).
+:- use_module(table, []).
 
 parser(Grammar, parser(Grammar, Tables, State)) :-
     Grammar = grammar(_Header, Assoc),
