@@ -3,7 +3,7 @@
                         test/2,
                         test/3,
                         load_parser/1,
-                        parse_and_scan/2
+                        scan_and_parse/2
                        ]).
 
 :- use_module(portray_grammar, []).
@@ -38,6 +38,6 @@ test(File, _Tokens, _Program) :-
     parse_grammar:parser(Grammar, Parser),
     view_parser:view_parser(Parser).
 
-parse_and_scan(Parser, Program) :-
+scan_and_parse(Parser, Program) :-
     lexer:scan_list(Parser, Tokens, ""),
     shift_reduce_parser:parse_tokens(Parser, Tokens, Program).
