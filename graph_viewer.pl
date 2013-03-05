@@ -6,20 +6,13 @@
 
 :- pce_autoload(graph_node, graph_node).
 
-:- pce_begin_class(graph_viewer(graph, graph_context, graph_members), frame).
-
-variable(graph_term, prolog, both, 'The currently used graph term').
-variable(graph_context, name, both, 'The calling context').
-variable(graph_members, prolog, both, 'The nondeterm predicate the list the graph nodes').
+:- pce_begin_class(graph_viewer, frame).
 
 :- meta_predicate generate(+, +, 3).
 
-initialise(GV, Graph:prolog, GraphContext:name, GraphMembers:prolog) :->
+initialise(GV) :->
     "Create graph-viewer"::
     send(GV, send_super, initialise, 'GOLD Parser Viewer'),
-    send(GV, graph_term, Graph),
-    send(GV, graph_context, GraphContext),
-    send(GV, graph_members, GraphMembers),
     send(GV, append, new(P, picture)),
     send(new(D, dialog), below, P),
     fill_dialog(D).
@@ -50,6 +43,17 @@ layout(F) :->
 :- pce_autoload(finder, library(find_file)).
 :- pce_global(@finder, new(finder)).
 
+generate(F, Graph:prolog) :->
+    "Create graph using generator"::
+    send(F, clear),
+    (	call(Graph, From, To),
+        send(F, display_arc, From, To),
+        fail
+    ;	true
+    ),
+    send(F, layout).
+
+
 postscript(F) :->
     "Create PostScript in file"::
     get(@finder, file, @off, '.eps', FileName),
@@ -61,19 +65,7 @@ postscript(F) :->
     send(File, done),
     send(F, report, status, 'Saved PostScript in %s', FileName).
 
-generate(F) :->
-    "Create graph using generator"::
-    get(F, graph_term, GraphTerm),
-    get(F, graph_context, GraphContext),
-    get(F, graph_members, GraphMembers),
-    functor(Iterator, GraphContext:GraphMembers, 0),
-    format('members: ~p', [GraphMembers]),
-    send(F, clear),
-    forall(call(Iterator, GraphTerm, From, To),
-           send(F, display_arc, From, To)),
-    send(F, layout).
-
-:- pce_global(@graph_link, new(link(link, link, line(0,0,0,0,second)))).
+    :- pce_global(@graph_link, new(link(link, link, line(0,0,0,0,second)))).
 
 display_arc(F, From:name, To:name) :->
     "Display arc From -> To"::

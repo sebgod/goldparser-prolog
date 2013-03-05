@@ -40,4 +40,4 @@ test(File, _Tokens, _Program) :-
 
 parse_and_scan(Parser, Program) :-
     lexer:scan_list(Parser, Tokens, ""),
-    shift_reduce_parser:parse_tokens(Parser, Tokens, Program).%
+    shift_reduce_parser:parse_tokens(Parser, Tokens, Program).

@@ -11,7 +11,8 @@
 :- use_module(symbol, []).
 
 view_parser(Parser) :-
-    new(GV, graph_viewer(Parser, view_parser, display)),
+    Term = view_parser:display(Parser),
+    new(GV, graph_viewer(Term)),
     send(GV, open),
     send(GV, status, full_screen),
     send(GV, generate).
@@ -44,15 +45,15 @@ display_lalr_action(Tables, LalrIndex, Name, Action, From, To) :-
     item:get(target, Action, Target),
     item:get(symbol_index, Action, SymbolIndex),
     (    format(atom(From), 'lalr-~d', [LalrIndex]),
-        format(atom(To), '~w ~d -> ~d',
-               [Name, LalrIndex, Target])
+         format(atom(To), '~w ~d -> ~d',
+                [Name, LalrIndex, Target])
     ;    format(atom(From), '~w ~d -> ~d',
-               [Name, LalrIndex, Target]),
-        (    display_lalr_target(Tables, Name, To, Target)
-        ;    (    Name = shift
-            ->  display_symbol(To, Tables, SymbolIndex)
-            )
-        )
+                [Name, LalrIndex, Target]),
+         (    display_lalr_target(Tables, Name, To, Target)
+         ;    (    Name = shift
+              ->  display_symbol(To, Tables, SymbolIndex)
+              )
+         )
     ).
 
 display_lalr_target(_Tables, Name, To, Target) :-
@@ -90,18 +91,3 @@ display_symbol(Atom, _Tables, Symbol) :-
 
 display_symbol_format(nonterminal, '<~w>') :- !.
 display_symbol_format(_, '~w').
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

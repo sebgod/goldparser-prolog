@@ -9,7 +9,9 @@ handle(w/2, 0, link, link).
 initialise(Node, Name:name) :->
     "Create from name"::
     send(Node, send_super, initialise),
-    send(Node, display, circle(60), point(-30, -30)),
+    Diameter = 60,
+    Radius = Diameter / 2,
+    send(Node, display, circle(Diameter), point(-Radius, -Radius)),
     send(Node, display, new(T, text(Name, center))),
     send(T, center, point(0, 0)),
     send(Node, send_super, name, Name).
