@@ -21,10 +21,16 @@ display(Parser, From, To) :-
     member(Kind, [display_lalr_states, display_rules]),
     call(Kind, Parser, From, To).
 
+iterate(Table, Tables, ItemIndex, Item, EntryIndex) :-
+    table:items(Table, Tables, ItemIndex, Item),
+    item:get_entries(Item, Entries),
+    item:entries(Entries, Item, EntryIndex).
+
+display_dfa_states(parser(_G, Tables, _S), From, To) :-
+    iterate(dfa_table, Tables, DFAIndex, DFA, _).
+
 display_lalr_states(parser(_G, Tables, _S), From, To) :-
-    table:items(lalr_table, Tables, LalrIndex, Lalr),
-    item:get_entries(Lalr, Actions),
-    item:entries(Actions, Action, _ActionIndex),
+    iterate(lalr_table, Tables, LalrIndex, Action, _),
     item:get(action, Action, ActionType),
     action:type(ActionType, Name),
     display_lalr_action(Tables, LalrIndex, Name, Action, From, To).
