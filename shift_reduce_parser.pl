@@ -34,12 +34,8 @@ next(program(parser(_Grammar, Tables, State), AST),
     ) :-
     state:current(State, lalr-LalrIndex),
     lalr:current(Tables, State, Lalr),
-    (   stack:peek(AST, Top)
-    ->  TOS = Top
-    ;   TOS = none
-    ),
-    format('peek [~p] current: ~p | ~p top: ~p~n\tlalr: ~p~n~n',
-           [LalrIndex, AST, Tokens, TOS, Lalr]),
+    format('peek [~p] current: ~p | ~p~n\tlalr: ~p~n~n',
+           [LalrIndex, AST, Tokens, Lalr]),
     peek(AST, Tokens, SymbolIndex-_Data),
     symbol:by_type(Tables, SymbolType, SymbolIndex, _Symbol),
     symbol:type(SymbolType, SymbolTypeName),
@@ -90,7 +86,8 @@ perform(reduce, Target,
     functor(Production, p, RuleSymbolSize),
     stack:push(AST0, HeadIndex-Production, ASTN),
     format('reduce\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
-           [ASTN, TokenR, Rule, Head]).
+           [ASTN, TokenR, Rule, Head]),
+    abort.
 
 perform(goto, Target,
         program(parser(Grammar, Tables, State0), AST),

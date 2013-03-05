@@ -1,8 +1,9 @@
 :- module(test_parser, [
-                        test/1,
-                        test/2,
-                        test/3,
-                        load_parser/1,
+                        test_scan/1,
+                        test_view/1,
+                        test_view/2,
+                        test_view/3,
+                        load_parser/2,
                         scan_and_parse/2
                        ]).
 
@@ -20,22 +21,26 @@ user:portray(symbol_index-2) :- write(symbol_index-'2#Whitespace').
 user:portray(symbol_index-3) :- write(symbol_index-'3#IntegerLiteral').
 user:portray(symbol_index-4) :- write(symbol_index-'4#<Program>').
 
+test_scan(Program) :-
+    test_scan('ParserTest.egt', Program).
 
-test(AST) :- test(_, program(_, AST)).
+test_scan(File, Program) :-
+    format('File: ~w~n~n', [File]),
+    load_parser(File, Parser),
+    scan_and_parse(Parser, Program).
 
-test(Tokens, Program) :-
-    test('ParserTest.egt', Tokens, Program).
-
-load_parser(Parser) :-
-    load_parser('ParserTest.egt', Parser).
 load_parser(File, Parser) :-
     read_grammar:read_file(Grammar, File),
     parse_grammar:parser(Grammar, Parser).
 
-test(File, _Tokens, _Program) :-
+test_view(AST) :- test_view(_, program(_, AST)).
+
+test_view(Tokens, Program) :-
+    test_view('ParserTest.egt', Tokens, Program).
+
+test_view(File, _Tokens, _Program) :-
     format('File: ~w~n~n', [File]),
-    read_grammar:read_file(Grammar, File),
-    parse_grammar:parser(Grammar, Parser),
+    load_parser(File, Parser),
     view_parser:view_parser(Parser).
 
 scan_and_parse(Parser, Program) :-
