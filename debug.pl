@@ -5,4 +5,4 @@
 
 :- use_module(test_parser, []).
 
-:- test_parser:test(_).
+:- test_parser:test_scan(_).

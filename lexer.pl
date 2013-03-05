@@ -23,8 +23,7 @@ scan_list(parser(G, T, State), Tokens, Input) :-
 
 scan_list_(parser(_G, Tables, _S), [Index-''], []) :-
     !,
-    symbol:type(Kind, eof),
-    once(symbol:by_type(Tables, Kind, Index, _)).
+    once(symbol:by_type_name(Tables, eof, Index, _)).
 
 scan_list_(Parser, [ Token | TRest ], Input) :-
     phrase(eat_token(Parser, Token), Input, IRest),

@@ -24,39 +24,37 @@ parse_tokens(Program0, ProgramN) -->
 parse_tokens(Program, Program) --> [].
 
 parse_token(P0, PN) -->
-    next(P0, ActionName, Target),
+    next_action(P0, ActionName, Target),
     {format('~p~n', perform(ActionName, Target))},
     perform(ActionName, Target, P0, PN).
 
-next(program(parser(_Grammar, Tables, State), AST),
-     ActionName, Target,
-     Tokens, Tokens
-    ) :-
+next_action(program(parser(_Grammar, Tables, State), AST),
+            ActionName, Target,
+            Tokens, Tokens
+           ) :-
     state:current(State, lalr-LalrIndex),
     lalr:current(Tables, State, Lalr),
-    format('peek [~p] current: ~p | ~p~n\tlalr: ~p~n~n',
-           [LalrIndex, AST, Tokens, Lalr]),
-    peek(AST, Tokens, SymbolIndex-_Data),
-    symbol:by_type(Tables, SymbolType, SymbolIndex, _Symbol),
-    symbol:type(SymbolType, SymbolTypeName),
-    (   SymbolTypeName = noise
-    ->  ActionName = skip
-    ;   item:get_entries(Lalr, Actions),
-        (   action:find(Actions, SymbolIndex, Action)
-        ->  FoundAction = Action
-        ;   action:list(Actions, [FoundAction])
-        ),
-        item:get(action, FoundAction, ActionType),
-        action:type(ActionType, ActionName),
-        item:get(target, FoundAction, Target),
-        format('[~p] -> [~p] ~p~n~n',
-               [LalrIndex, Target, FoundAction])
+    [Lookahead | _] = Tokens,
+    format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
+           [LalrIndex, AST, Lookahead, Lalr]),
+    (   [SymbolIndex-Data | _] = Tokens
+    ->  symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
+        SymbolTypeName \= eof,
+        (   SymbolTypeName = noise
+        ->  ActionName = skip
+        ;   item:get_entries(Lalr, Actions),
+            (   action:find(Actions, SymbolIndex, Action)
+            ->  FoundAction = Action
+            ;   action:list(Actions, [FoundAction])
+            ),
+            item:get(action, FoundAction, ActionType),
+            action:type(ActionType, ActionName),
+            item:get(target, FoundAction, Target),
+            format('[~p] -> [~p] ~p~n~n',
+                   [LalrIndex, Target, FoundAction])
+        )
+    ;   stack:peek(AST, SymbolIndex-Data)
     ).
-
-peek(_AST, Tokens, SymbolIndex-Data) :-
-    [SymbolIndex-Data | _] = Tokens.
-peek(AST, _Tokens, SymbolIndex-Data) :-
-    stack:peek(AST, SymbolIndex-Data).
 
 perform(skip, _, P, P, [_SkippedToken | TokenR], TokenR).
 
@@ -77,7 +75,7 @@ perform(reduce, Target,
     P = parser(_, Tables, _),
     table:item(rule_table, Tables, Target, Rule),
     item:get(head_index, Rule, HeadIndex),
-    symbol:by_type(Tables, nonterminal, HeadIndex, Head),
+    symbol:by_type_name(Tables, nonterminal, HeadIndex, Head),
     (   item:get_entries(Rule, RuleEntries)
     ->  RuleSymbols = RuleEntries
     ;   RuleSymbols = []
