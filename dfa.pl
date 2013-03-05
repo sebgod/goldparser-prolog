@@ -21,7 +21,7 @@ accept(DFA, Accept) :-
 
 find_edge(Tables, DFA, Code, TargetIndex) :-
     item:get_entries(DFA, Entries),
-    (   item:entries(Entries, Entry, _EntryIndex),
+    (   item:entry_members(Entries, Entry, _EntryIndex),
         item:get(target_index, Entry, TargetIndex),
         item:get(character_set_index, Entry, CharsetIndex),
         table:item(character_set_table, Tables, CharsetIndex, Charset),

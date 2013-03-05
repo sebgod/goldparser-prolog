@@ -46,10 +46,10 @@ layout(F) :->
 generate(F, Graph:prolog) :->
     "Create graph using generator"::
     send(F, clear),
-    (	call(Graph, From, To),
-        send(F, display_arc, From, To),
-        fail
-    ;	true
+    (    call(Graph, From, To),
+         send(F, display_arc, From, To),
+         fail
+    ;    true
     ),
     send(F, layout).
 

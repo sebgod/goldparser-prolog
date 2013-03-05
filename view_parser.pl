@@ -12,10 +12,10 @@
 
 view_parser(Parser) :-
     Term = view_parser:display(Parser),
-    new(GV, graph_viewer(Term)),
+    new(GV, graph_viewer),
     send(GV, open),
     send(GV, status, full_screen),
-    send(GV, generate).
+    send(GV, generate, Term).
 
 display(Parser, From, To) :-
     member(Kind, [display_lalr_states, display_rules]),
@@ -24,10 +24,10 @@ display(Parser, From, To) :-
 iterate(Table, Tables, ItemIndex, Item, EntryIndex) :-
     table:items(Table, Tables, ItemIndex, Item),
     item:get_entries(Item, Entries),
-    item:entries(Entries, Item, EntryIndex).
+    item:entry_members(Entries, Item, EntryIndex).
 
-display_dfa_states(parser(_G, Tables, _S), From, To) :-
-    iterate(dfa_table, Tables, DFAIndex, DFA, _).
+%display_dfa_states(parser(_G, Tables, _S), From, To) :-
+%    iterate(dfa_table, Tables, DFAIndex, DFA, _).
 
 display_lalr_states(parser(_G, Tables, _S), From, To) :-
     iterate(lalr_table, Tables, LalrIndex, Action, _),
@@ -42,7 +42,7 @@ display_rules(parser(_G, Tables, _S), From, To) :-
 display_production(Tables, Rule, From, To) :-
     display_rule(From, Tables, Rule),
     item:get_entries(Rule, Symbols),
-    item:entries(Symbols, Symbol, _),
+    item:entry_members(Symbols, Symbol, _),
     item:get(symbol, Symbol, SymbolIndex),
     display_symbol(To, Tables, SymbolIndex).
 

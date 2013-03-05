@@ -4,7 +4,7 @@
                  get_entries/2,
                  set_entries/3,
                  entries_to_list/2,
-                 entries/3,
+                 entry_members/3,
                  entry_size/2
                 ]).
 
@@ -30,7 +30,7 @@ entries_to_list(Entries, Entries) :-
 entries_to_list(EntryTerm, Entries) :-
     EntryTerm =.. [entries | Entries].
 
-entries(Entries, Entry, EntryIndex) :-
+entry_members(Entries, Entry, EntryIndex) :-
     arg(ArgIndex, Entries, Entry),
     EntryIndex is ArgIndex - 1.
 
