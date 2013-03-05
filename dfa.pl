@@ -20,10 +20,8 @@ accept(DFA, Accept) :-
     ).
 
 find_edge(Tables, DFA, Code, TargetIndex) :-
-    item:get_entries(DFA, Entries),
-    (   item:entry_members(Entries, Entry, _EntryIndex),
-        item:get(target_index, Entry, TargetIndex),
-        item:get(character_set_index, Entry, CharsetIndex),
-        table:item(character_set_table, Tables, CharsetIndex, Charset),
-        charset:member(Charset, Code) -> !
-    ).
+    item:entries(DFA, Edge, _EntryIndex),
+    item:get(target_index, Edge, TargetIndex),
+    item:get(character_set_index, Edge, CharsetIndex),
+    table:item(character_set_table, Tables, CharsetIndex, Charset),
+    charset:member(Charset, Code) -> !.

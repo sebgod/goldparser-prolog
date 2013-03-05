@@ -5,6 +5,7 @@
                  set_entries/3,
                  entries_to_list/2,
                  entry_members/3,
+                 entries/3,
                  entry_size/2
                 ]).
 
@@ -33,6 +34,10 @@ entries_to_list(EntryTerm, Entries) :-
 entry_members(Entries, Entry, EntryIndex) :-
     arg(ArgIndex, Entries, Entry),
     EntryIndex is ArgIndex - 1.
+
+entries(Item, Entry, EntryIndex) :-
+    get_entries(Item, Entries),
+    entry_members(Entries, Entry, EntryIndex).
 
 entry_size(Entries, Size) :-
     functor(Entries, entries, Size), !.

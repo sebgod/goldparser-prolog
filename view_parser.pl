@@ -23,8 +23,7 @@ display(Parser, From, To) :-
 
 iterate(Table, Tables, ItemIndex, Entry, EntryIndex) :-
     table:items(Table, Tables, ItemIndex, Item),
-    item:get_entries(Item, Entries),
-    item:entry_members(Entries, Entry, EntryIndex).
+    item:entries(Item, Entry, EntryIndex).
 
 %display_dfa_states(parser(_G, Tables, _S), From, To) :-
 %    iterate(dfa_table, Tables, DFAIndex, DFA, _).
@@ -41,8 +40,7 @@ display_rules(parser(_G, Tables, _S), From, To) :-
 
 display_production(Tables, Rule, From, To) :-
     display_rule(From, Tables, Rule),
-    item:get_entries(Rule, Symbols),
-    item:entry_members(Symbols, Symbol, _),
+    item:entries(Rule, Symbol, _),
     item:get(symbol, Symbol, SymbolIndex),
     display_symbol(To, Tables, SymbolIndex).
 
