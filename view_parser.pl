@@ -17,7 +17,6 @@
 
 
 view_parser(Parser) :-
-    Parser = parser(grammar(_Header, _), _, _),
     new(GV, graph_viewer(Parser, display)),
     send(GV, open),
     send(GV, status, full_screen),

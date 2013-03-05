@@ -6,12 +6,14 @@
 
 :- pce_begin_class(graph_viewer(graph, graph_members), frame).
 
-%:- variable().
+variable(graph_term, prolog, both, 'The currently used graph term').
+variable(graph_members, prolog, both, 'The nondeterm predicate the list the graph nodes').
 
 initialise(GV, Graph:prolog, GraphMembers:prolog) :->
     "Create graph-viewer"::
-    format('~w ~w ~n', [Graph, GraphMembers]),
     send(GV, send_super, initialise, 'GOLD Parser Viewer'),
+    send(GV, graph_term, Graph),
+    send(GV, graph_members, GraphMembers),
     send(GV, append, new(P, picture)),
     send(new(D, dialog), below, P),
     fill_dialog(D).
