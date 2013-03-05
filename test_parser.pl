@@ -21,17 +21,17 @@ test(Tokens, Program) :-
     test('ParserTest.egt', Tokens, Program).
 
 load_parser(Parser) :-
-	load_parser('ParserTest.egt', Parser).
+    load_parser('ParserTest.egt', Parser).
 load_parser(File, Parser) :-
-	read_grammar:read_file(Grammar, File),
-	parse_grammar:parser(Grammar, Parser).
+    read_grammar:read_file(Grammar, File),
+    parse_grammar:parser(Grammar, Parser).
 
 test(File, _Tokens, _Program) :-
-	format('File: ~w~n~n', [File]),
-	read_grammar:read_file(Grammar, File),
-	parse_grammar:parser(Grammar, Parser),
-	view_parser:view_parser(Parser).
+    format('File: ~w~n~n', [File]),
+    read_grammar:read_file(Grammar, File),
+    parse_grammar:parser(Grammar, Parser),
+    view_parser:view_parser(Parser).
 
-					%lexer:scan_list(Parser, Tokens, ""),
+                    %lexer:scan_list(Parser, Tokens, ""),
 %shift_reduce_parser:parse_tokens(Parser, Tokens, Program).
 %
