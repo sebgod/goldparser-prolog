@@ -1,6 +1,6 @@
 
 :- module(view_parser,
-      [ view_parser/1 ]).
+      [ view_parser/1, display/3 ]).
 
 :- pce_autoload(graph_viewer, graph_viewer).
 
@@ -9,15 +9,9 @@
 :- use_module(item, []).
 :- use_module(action, []).
 :- use_module(symbol, []).
-:- require([ forall/2
-       , term_variables/2
-       , random/3
-       , term_to_atom/2
-       ]).
-
 
 view_parser(Parser) :-
-    new(GV, graph_viewer(Parser, display)),
+    new(GV, graph_viewer(Parser, view_parser, display)),
     send(GV, open),
     send(GV, status, full_screen),
     send(GV, generate).
