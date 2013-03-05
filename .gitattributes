@@ -2,7 +2,7 @@
 * text=auto
 
 # Setup prolog files
-*.pl text diff=prolog filter=tabspace tabwidth=4
+*.pl text diff=prolog tabwidth=4
 
 # Custom for Visual Studio
 *.cs     diff=csharp
