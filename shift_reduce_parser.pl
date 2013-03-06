@@ -34,27 +34,32 @@ next_action(program(parser(_Grammar, Tables, State), AST),
            ) :-
     state:current(State, lalr-LalrIndex),
     lalr:current(Tables, State, Lalr),
-    [Lookahead | _] = Tokens,
+    (   [Token | _] = Tokens
+    ->  Lookahead = Token
+    ;   Lookahead = none
+    ),
     format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
            [LalrIndex, AST, Lookahead, Lalr]),
+    item:get_entries(Lalr, Actions),
     (   [SymbolIndex-Data | _] = Tokens
     ->  symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
-        SymbolTypeName \= eof,
+        format('matching symbol: ~w~n', [SymbolTypeName-SymbolIndex]),
         (   SymbolTypeName = noise
         ->  ActionName = skip
-        ;   item:get_entries(Lalr, Actions),
-            (   action:find(Actions, SymbolIndex, Action)
-            ->  FoundAction = Action
-            ;   action:list(Actions, [FoundAction])
-            ),
+        ;   action:find(Actions, SymbolIndex, FoundAction),
             item:get(action, FoundAction, ActionType),
             action:type(ActionType, ActionName),
-            item:get(target, FoundAction, Target),
-            format('[~p] -> [~p] ~p~n~n',
-                   [LalrIndex, Target, FoundAction])
+            item:get(target, FoundAction, Target)
         )
-    ;   stack:peek(AST, SymbolIndex-Data)
-    ).
+    ;   format('in goto branch~n'),
+        stack:peek(AST, SymbolIndex-Data),
+        action:find(Actions, SymbolIndex, FoundAction),
+        item:get(action, FoundAction, ActionType),
+        action:type(ActionType, ActionName),
+        item:get(target, FoundAction, Target)
+    ),
+    format('[~p] ~w-> [~p] ~p~n~n',
+           [LalrIndex, ActionName, Target, FoundAction]).
 
 perform(skip, _, P, P, [_SkippedToken | TokenR], TokenR).
 
@@ -70,7 +75,7 @@ perform(shift, Target,
 
 perform(reduce, Target,
         program(P, AST0), program(P, ASTN),
-        TokenR, TokenR
+        [Token | TokenR], TokenR
        ) :-
     P = parser(_, Tables, _),
     table:item(rule_table, Tables, Target, Rule),
@@ -84,8 +89,7 @@ perform(reduce, Target,
     functor(Production, p, RuleSymbolSize),
     stack:push(AST0, HeadIndex-Production, ASTN),
     format('reduce\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
-           [ASTN, TokenR, Rule, Head]),
-    abort.
+           [ASTN, Token, Rule, Head]).
 
 perform(goto, Target,
         program(parser(Grammar, Tables, State0), AST),
