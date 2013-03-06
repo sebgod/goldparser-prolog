@@ -41,19 +41,15 @@ next_action(program(parser(_Grammar, Tables, State), AST),
     format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
            [LalrIndex, AST, Lookahead, Lalr]),
     item:get_entries(Lalr, Actions),
-    (   [SymbolIndex-Data | _] = Tokens
-    ->  symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
-        format('matching symbol: ~w~n', [SymbolTypeName-SymbolIndex]),
-        (   SymbolTypeName = noise
-        ->  ActionName = skip
-        ;   action:find(Actions, SymbolIndex, FoundAction),
-            item:get(action, FoundAction, ActionType),
-            action:type(ActionType, ActionName),
-            item:get(target, FoundAction, Target)
-        )
-    ;   format('in goto branch~n'),
-        stack:peek(AST, SymbolIndex-Data),
-        action:find(Actions, SymbolIndex, FoundAction),
+    % first try to shift a token, then look for goto's
+    (   [SymbolIndex-Data | _] = Tokens, !
+    ;   stack:peek(AST, SymbolIndex-Data)
+    ),
+    symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
+    format('matching symbol: ~w~n', [SymbolTypeName-SymbolIndex]),
+    (   SymbolTypeName = noise
+    ->  ActionName = skip
+    ;   action:find(Actions, SymbolIndex, FoundAction),
         item:get(action, FoundAction, ActionType),
         action:type(ActionType, ActionName),
         item:get(target, FoundAction, Target)
