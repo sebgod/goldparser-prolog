@@ -56,20 +56,19 @@ parse_tokens(Parser, Tokens, ProgramN) :-
     reset(Parser, Program0),
     phrase(parse_tokens(Program0, ProgramN), Tokens, []).
 
-reset(Parser, program(Parser, StateN, AST1)) :-
+reset(Parser, program(Parser, StateN, AST0)) :-
     Parser = parser(Grammar, _Tables),
     stack:empty(AST0),
-    stack:push(AST0, p(s), AST1),
+    % push the start symbol, stack:push(AST0, p(s), AST1),
     Grammar = grammar(_Header, Assoc),
     get_assoc(initial_states, Assoc, [State0]),
     state:merge(State0, [accept-false], StateN).
 
+parse_tokens(Program, Program, [], []) :- !.
+
 parse_tokens(Program0, ProgramN) -->
     parse_token(Program0, Program1),
-    !,
     parse_tokens(Program1, ProgramN).
-
-parse_tokens(Program, Program) --> [].
 
 parse_token(P0, PN) -->
     next_action(P0, ActionName, Target),
@@ -89,23 +88,33 @@ next_action(program(parser(_Grammar, Tables), State, AST),
     format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
            [LalrIndex, AST, Lookahead, Lalr]),
     item:get_entries(Lalr, Actions),
-    lookahead(AST, Tokens, SymbolIndex),
+    (   stack:peek(AST, SymbolIndex-_Data),
+        ActionName = goto,
+        symbol_to_action(Tables, SymbolIndex, Actions,
+                         ActionName, Target)
+    ->  !
+    ;   lookahead(Tokens, SymbolIndex),
+        symbol_to_action(Tables, SymbolIndex, Actions,
+                         ActionName, Target)
+    ).
+
+symbol_to_action(Tables, SymbolIndex, Actions, ActionName, Target) :-
     symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
-    format('matching symbol: ~w~n', [SymbolTypeName-SymbolIndex]),
-    symbol_type_to_action(SymbolTypeName-SymbolIndex, Actions, ActionName, Target).
+    format('trying symbol: ~w~n', [SymbolTypeName-SymbolIndex]),
+    symbol_type_to_action(SymbolTypeName-SymbolIndex,
+                          Actions, ActionName, Target).
 
-% first try to shift a token, then look for goto's
-lookahead(_AST, Tokens, SymbolIndex) :-
-    [SymbolIndex-_Data | _] = Tokens, !.
+lookahead(Tokens, SymbolIndex) :-
+    [SymbolIndex-_Data | _] = Tokens.
 
-lookahead(AST, _Tokens, SymbolIndex) :-
-    stack:peek(AST, SymbolIndex-_Data).
+symbol_type_to_action(noise-_SymbolIndex,
+                      _Actions, skip, _Target) :- !.
 
-symbol_type_to_action(noise-_SymbolIndex, _Actions, skip, _Target) :- !.
+symbol_type_to_action(accept-_SymbolIndex,
+                      _Actions, accept, _Target) :- !.
 
-symbol_type_to_action(accept-_SymbolIndex, _Actions, accept, _Target) :- !.
-
-symbol_type_to_action(_SymbolTypeName-SymbolIndex, Actions, ActionName, Target) :-
+symbol_type_to_action(_-SymbolIndex,
+                      Actions, ActionName, Target) :-
     action:find(Actions, SymbolIndex, FoundAction),
     item:get(action, FoundAction, ActionType),
     action:type(ActionType, ActionName),
@@ -122,11 +131,11 @@ perform(shift, Target,
     !,
     state:merge(State0, [lalr-Target], StateN),
     stack:push(AST0, Token, ASTN),
-    format('shift\t~p | ~p~n~n', [ASTN, TokenR]).
+    format('\t~p | ~p~n~n', [ASTN, TokenR]).
 
 perform(reduce, Target,
-        program(P, State, AST0), program(P, State, ASTN),
-        [Token | TokenR], TokenR
+        program(P, State0, AST0), program(P, State1, ASTN),
+        TokenR, TokenR
        ) :-
     P = parser(_, Tables),
     table:item(rule_table, Tables, Target, Rule),
@@ -137,10 +146,20 @@ perform(reduce, Target,
     ;   RuleSymbols = []
     ),
     item:entry_size(RuleSymbols, RuleSymbolSize),
-    functor(Production, p, RuleSymbolSize),
-    stack:push(AST0, HeadIndex-Production, ASTN),
-    format('reduce\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
-           [ASTN, Token, Rule, Head]).
+    length(Handle, RuleSymbolSize),
+    append(Handle, AST1, AST0),
+    % Reached the last production, so reset the LALR state
+    % to the initial state (here 0), should be dynamic
+    (   AST1 = []
+    ->  state:merge(State0, [lalr-0], State1)
+    ;   State1 = State0
+    ),
+    format('\tarity: ~w ~p~n\tremain: ~p~n',
+           [RuleSymbolSize, Handle, AST1]),
+    Production =.. [p | Handle],
+    stack:push(AST1, HeadIndex-Production, ASTN),
+    format('\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
+           [ASTN, TokenR, Rule, Head]).
 
 perform(goto, Target,
         program(parser(Grammar, Tables), State0, AST),
@@ -149,12 +168,17 @@ perform(goto, Target,
        ) :-
     state:merge(State0, [lalr-Target], StateN),
     table:item(lalr_table, Tables, Target, Lalr),
-    format('goto\t~p | ~p~n\ttarget state: [~p] ~p~n~n', [AST, Tokens, Target, Lalr]).
+    format('\t~p | ~p~n\ttarget state: [~p] ~p~n~n', [AST, Tokens, Target, Lalr]).
 
 perform(accept, _,
         program(parser(Grammar, Tables), State0, AST0),
         program(parser(Grammar, Tables), StateN, ASTN),
-        [], []) :-
-    state:merge(State0, [accept-true], StateN),
+        Tokens, []) :-
+    (   [SymbolIndex-_] = Tokens,
+        symbol:by_type_name(Tables, eof, SymbolIndex, _)
+    ->  Accept = true
+    ;   Accept = false
+    ),
+    state:merge(State0, [accept-Accept], StateN),
     ASTN = AST0,
     format('accepted\t~p~n~n', [ASTN]).
