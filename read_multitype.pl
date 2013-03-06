@@ -6,69 +6,69 @@
 :- use_module(read_primitive).
 :- use_module(support).
 
-structure_type_db('p', property,
-                  [
-                   (index, short),
-                   (name, string),
-                   (value, string)
-                  ]).
-structure_type_db('t', table_counts,
-                  [
-                   (symbol_table, short),
-                   (character_set_table, short),
-                   (rule_table, short),
-                   (dfa_table, short),
-                   (lalr_table, short),
-                   (group_table, short)
-                  ]).
-structure_type_db('I', initial_states,
-                  [(dfa, short), (lalr, short)]
-                 ).
-structure_type_db('c', character_set_table,
-                  [
-                   (index, short),
-                   (unicode_plane, short),
-                   (range_count, short)
-                  ]).
-structure_type_db('S', symbol_table,
-                  [
-                   (index, short),
-                   (name, string),
-                   (kind, short)
-                  ]).
-structure_type_db('R', rule_table,
-                  [
-                   (index, short),
-                   (head_index, short)
-                  ]).
-structure_type_db('D', dfa_table,
-                  [
-                   (index, short),
-                   (accept_state, boolean),
-                   (accept_index, short)
-                  ]).
-structure_type_db('L', lalr_table, [(index, short)]).
+descriptor('p', property,
+           [
+            (index, short),
+            (name, string),
+            (value, string)
+           ]).
+descriptor('t', table_counts,
+           [
+            (symbol_table, short),
+            (character_set_table, short),
+            (rule_table, short),
+            (dfa_table, short),
+            (lalr_table, short),
+            (group_table, short)
+           ]).
+descriptor('I', initial_states,
+           [(dfa, short), (lalr, short)]
+          ).
+descriptor('c', character_set_table,
+           [
+            (index, short),
+            (unicode_plane, short),
+            (range_count, short)
+           ]).
+descriptor('S', symbol_table,
+           [
+            (index, short),
+            (name, string),
+            (kind, short)
+           ]).
+descriptor('R', rule_table,
+           [
+            (index, short),
+            (head_index, short)
+           ]).
+descriptor('D', dfa_table,
+           [
+            (index, short),
+            (accept_state, boolean),
+            (accept_index, short)
+           ]).
+descriptor('L', lalr_table, [(index, short)]).
 
-structure_rest_type(rule_table, [(symbol, short)]).
-structure_rest_type(lalr_table,
-                    [
-                     (symbol_index, short),
-                     (action, short),
-                     (target, short)
-                    ]).
-structure_rest_type(dfa_table,
-                    [
-                     (character_set_index, short),
-                     (target_index, short)
-                    ]).
-structure_rest_type(character_set_table,
-                    [
-                     (start_character, short),
-                     (end_character, short)
-                    ]).
+variable_part(rule_table, [(symbol, short)]).
+variable_part(lalr_table,
+              [
+               (symbol_index, short),
+               (action, short),
+               (target, short)
+              ]).
+variable_part(dfa_table,
+              [
+               (character_set_index, short),
+               (target_index, short)
+              ]).
+variable_part(character_set_table,
+              [
+               (start_character, short),
+               (end_character, short)
+              ]).
 
 structure_type(Letter, Name, Props) :-
-    structure_type_db(Letter, Name, Props),
+    descriptor(Letter, Name, Props),
     !.
 
 structure_type(Letter, _, _) :-
@@ -98,14 +98,15 @@ fill_structure_rest([], _, Structure, Structure).
 fill_structure_rest([empty | Rest], Key) -->
     fill_structure_rest(Rest, Key).
 fill_structure_rest(Rest, Key, Structure0, Structure) :-
-    structure_rest_type(Key, Typings),
+    variable_part(Key, Typings),
     list_trim(Typings, Rest, Trimmed, Next),
     maplist(fill_structure_acc, Typings, Trimmed, UnsortedRecord),
     list_to_assoc(UnsortedRecord, Record),
     append(Structure0, [Record], Structure1),
     fill_structure_rest(Next, Key, Structure1, Structure).
 
-fill_structure_acc((Key, Type), ValueEntry, Key-Value) :- ValueEntry =.. [Type, Value].
+fill_structure_acc((Key, Type), ValueEntry, Key-Value) :-
+    ValueEntry =.. [Type, Value].
 
 read_record(Stream, 'M', record(multitype, NumberOfEntries, Entries)) :-
     !,
@@ -139,6 +140,7 @@ read_multitype_entry(Stream, 'S', string(String)) :- !,
     read_utf16le_z(Stream, String).
 
 read_multitype_entry(_Stream, Unknown, _Parsed) :- !,
-    throw(error('Unknown multitype', context(read_multitype_entry/3, Unknown))).
+    throw(error('Unknown multitype',
+                context(read_multitype_entry/3, Unknown))).
 
 
