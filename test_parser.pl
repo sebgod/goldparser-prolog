@@ -8,7 +8,6 @@
                        ]).
 
 :- use_module(portray_grammar, []).
-:- use_module(parse_grammar, []).
 :- use_module(read_grammar, []).
 :- use_module(lexer, []).
 :- use_module(shift_reduce_parser, []).
@@ -31,7 +30,7 @@ test_scan(File, Program) :-
 
 load_parser(File, Parser) :-
     read_grammar:read_file(Grammar, File),
-    parse_grammar:parser(Grammar, Parser).
+    shift_reduce_parser:parser(Grammar, Parser).
 
 test_view(AST) :- test_view(_, program(_, AST)).
 
@@ -43,6 +42,7 @@ test_view(File, _Tokens, _Program) :-
     load_parser(File, Parser),
     view_parser:view_parser(Parser).
 
-scan_and_parse(Parser, Program) :-
-    lexer:scan_list(Parser, Tokens, "1234"),
-    shift_reduce_parser:parse_tokens(Parser, Tokens, Program).
+scan_and_parse(Parser, ProgramN) :-
+    shift_reduce_parser:reset(Parser, Program0),
+    lexer:scan_list(Program0, Tokens, "1234"),
+    shift_reduce_parser:parse_tokens(Parser, Tokens, ProgramN).
