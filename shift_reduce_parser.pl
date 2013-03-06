@@ -146,17 +146,11 @@ perform(reduce, Target,
     ;   RuleSymbols = []
     ),
     item:entry_size(RuleSymbols, RuleSymbolSize),
-    length(Handle, RuleSymbolSize),
-    append(Handle, AST1, AST0),
-    % Reached the last production, so reset the LALR state
-    % to the initial state (here 0), should be dynamic
-    (   AST1 = []
-    ->  state:merge(State0, [lalr-0], State1)
-    ;   State1 = State0
-    ),
+    stack:rpop(AST0, RuleSymbolSize, Handles, AST1),
+    update_reduction_state(P, AST1, State0, State1),
     format('\tarity: ~w ~p~n\tremain: ~p~n',
-           [RuleSymbolSize, Handle, AST1]),
-    Production =.. [p | Handle],
+           [RuleSymbolSize, Handles, AST1]),
+    Production =.. [p | Handles],
     stack:push(AST1, HeadIndex-Production, ASTN),
     format('\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
            [ASTN, TokenR, Rule, Head]).
@@ -173,12 +167,32 @@ perform(goto, Target,
 perform(accept, _,
         program(parser(Grammar, Tables), State0, AST0),
         program(parser(Grammar, Tables), StateN, ASTN),
-        Tokens, []) :-
-    (   [SymbolIndex-_] = Tokens,
-        symbol:by_type_name(Tables, eof, SymbolIndex, _)
+        Tokens, TokensR) :-
+    (   [SymbolIndex-_ | TokensR] = Tokens,
+        symbol:by_type_name(Tables, eof, SymbolIndex, _),
+        TokensR = []
     ->  Accept = true
     ;   Accept = false
     ),
     state:merge(State0, [accept-Accept], StateN),
     ASTN = AST0,
     format('accepted\t~p~n~n', [ASTN]).
+
+update_reduction_state(_Parser, AST, State0, State1) :-
+    % Reached the last production, so reset the LALR state
+    % to the initial state (here 0), should be dynamic
+    (   AST = []
+    ->  state:merge(State0, [lalr-0], State1)
+    ;   State1 = State0
+    ).
+
+
+
+
+
+
+
+
+
+
+
