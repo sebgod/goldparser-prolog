@@ -5,11 +5,14 @@
 user:portray(parser(Grammar, Tables)) :-
     Grammar = grammar(header(Header), Assoc),
     format('Version: ~w~n', [Header]),
-    print_tables(Tables),
-    assoc_to_keys(Assoc, AssocKeys),
-    assoc_to_keys(Tables, TableKeys),
-    ord_subtract(AssocKeys, TableKeys, Other),
-    print_assoc_items(Assoc, Other).
+    (   current_prolog_flag(debug, false)
+    ->  print_tables(Tables),
+        assoc_to_keys(Assoc, AssocKeys),
+        assoc_to_keys(Tables, TableKeys),
+        ord_subtract(AssocKeys, TableKeys, Other),
+        print_assoc_items(Assoc, Other)
+    ;   true
+    ).
 
 user:portray('_entries'-Entries) :-
     Space = '        ',
@@ -57,8 +60,5 @@ print_assoc_items(Assoc, List) :-
 print_list_vertical(Name, List) :-
     length(List, Length),
     format('~w: ~d~n', [Name, Length]),
-    (   Length > 0
-    ->  forall(member(Value, List), format('    ~p~n', [Value]))
-    ;   format('~w', [[]])
-    ).
+    forall(member(Value, List), format('    ~p~n', [Value])).
 
