@@ -41,21 +41,28 @@ next_action(program(parser(_Grammar, Tables, State), AST),
     format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
            [LalrIndex, AST, Lookahead, Lalr]),
     item:get_entries(Lalr, Actions),
-    % first try to shift a token, then look for goto's
-    (   [SymbolIndex-Data | _] = Tokens, !
-    ;   stack:peek(AST, SymbolIndex-Data)
-    ),
+    lookahead(AST, Tokens, SymbolIndex),
     symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
     format('matching symbol: ~w~n', [SymbolTypeName-SymbolIndex]),
-    (   SymbolTypeName = noise
-    ->  ActionName = skip
-    ;   action:find(Actions, SymbolIndex, FoundAction),
-        item:get(action, FoundAction, ActionType),
-        action:type(ActionType, ActionName),
-        item:get(target, FoundAction, Target)
-    ),
-    format('[~p] ~w-> [~p] ~p~n~n',
-           [LalrIndex, ActionName, Target, FoundAction]).
+    symbol_type_to_action(SymbolTypeName-SymbolIndex, Actions, ActionName, Target).
+
+% first try to shift a token, then look for goto's
+lookahead(_AST, Tokens, SymbolIndex) :-
+    [SymbolIndex-_Data | _] = Tokens, !.
+
+lookahead(AST, _Tokens, SymbolIndex) :-
+    stack:peek(AST, SymbolIndex-_Data).
+
+symbol_type_to_action(noise-_SymbolIndex, _Actions, skip, _Target) :- !.
+
+symbol_type_to_action(accept-_SymbolIndex, _Actions, accept, _Target) :- !.
+
+symbol_type_to_action(_SymbolTypeName-SymbolIndex, Actions, ActionName, Target) :-
+    action:find(Actions, SymbolIndex, FoundAction),
+    item:get(action, FoundAction, ActionType),
+    action:type(ActionType, ActionName),
+    item:get(target, FoundAction, Target),
+    format('~w-> [~p] ~p~n~n', [ActionName, Target, FoundAction]).
 
 perform(skip, _, P, P, [_SkippedToken | TokenR], TokenR).
 
