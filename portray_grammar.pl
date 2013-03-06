@@ -2,15 +2,14 @@
 
 :- use_module(library(assoc)).
 
-user:portray(parser(Grammar, Tables, State)) :-
+user:portray(parser(Grammar, Tables)) :-
     Grammar = grammar(header(Header), Assoc),
     format('Version: ~w~n', [Header]),
     print_tables(Tables),
     assoc_to_keys(Assoc, AssocKeys),
     assoc_to_keys(Tables, TableKeys),
     ord_subtract(AssocKeys, TableKeys, Other),
-    print_assoc_items(Assoc, Other),
-    format('state: ~p~n', [State]).
+    print_assoc_items(Assoc, Other).
 
 user:portray('_entries'-Entries) :-
     Space = '        ',
@@ -58,5 +57,8 @@ print_assoc_items(Assoc, List) :-
 print_list_vertical(Name, List) :-
     length(List, Length),
     format('~w: ~d~n', [Name, Length]),
-    forall(member(Value, List), format('    ~p~n', [Value])).
+    (   Length > 0
+    ->  forall(member(Value, List), format('    ~p~n', [Value]))
+    ;   format('~w', [[]])
+    ).
 
