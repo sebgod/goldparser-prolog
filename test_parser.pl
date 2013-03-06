@@ -44,5 +44,5 @@ test_view(File, _Tokens, _Program) :-
     view_parser:view_parser(Parser).
 
 scan_and_parse(Parser, Program) :-
-    lexer:scan_list(Parser, Tokens, ""),
+    lexer:scan_list(Parser, Tokens, "1234"),
     shift_reduce_parser:parse_tokens(Parser, Tokens, Program).
