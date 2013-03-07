@@ -26,8 +26,19 @@ scan_list_(parser(_G, Tables), _State, [Index-''], []) :-
     once(symbol:by_type_name(Tables, eof, Index, _)).
 
 scan_list_(Parser, State, [ Token | TRest ], Input) :-
-    phrase(eat_token(Parser, State, Token), Input, IRest),
-    scan_list_(Parser, State, TRest, IRest).
+    (   phrase(eat_token(Parser, State, Token), Input, InputR)
+    ->  !
+    ;   Parser = parser(_G, Tables),
+        once(symbol:by_type_name(Tables, error, Index, _)),
+        try_restore_input(Input, FailedInput, InputR),
+        Input = [FailedInput | InputR],
+        format(atom(Error), '~w', [FailedInput]),
+        Token = Index-Error
+    ),
+    scan_list_(Parser, State, TRest, InputR).
+
+try_restore_input([], [], []).
+try_restore_input([Skipped | InputR], Skipped, InputR).
 
 eat_token(parser(G, Tables), State, Token) -->
     {

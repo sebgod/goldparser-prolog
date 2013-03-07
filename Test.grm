@@ -1,0 +1,24 @@
+
+ 
+"Name"         = 'GOLD Meta-Language'
+"Version"      = '2.6.0'
+"Author"       = 'Devin Cook'
+"About"        = 'This grammar defines the GOLD Meta-Language.'
+
+"Start Symbol" = <Grammar>
+
+{Parameter Ch}   = {Printable}    - ["] - ['']
+{Nonterminal Ch} = {Alphanumeric} + [_-.] + {Space} 
+{Terminal Ch}    = {Alphanumeric} + [_-.] 
+{Literal Ch}     = {Printable}    - ['']     
+{Set Literal Ch} = {Printable}    - ['['']'] - ['']
+{Set Name Ch}    = {Printable}    - [{}]
+
+ParameterName  = '"' {Parameter Ch}+ '"' 
+Nonterminal    = '<' {Nonterminal Ch}+ '>'
+Terminal       = {Terminal Ch}+  | '' {Literal Ch}* ''  
+SetLiteral     = '[' ({Set Literal Ch} | '' {Literal Ch}* '' )+ ']'
+SetName        = '{' {Set Name Ch}+ '}'
+
+<Grammar> ::= SetName
+        

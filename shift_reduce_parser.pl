@@ -35,7 +35,6 @@ parse_tokens(Program0, ProgramN) -->
 
 parse_token(P0, PN) -->
     next_action(P0, ActionName, Target),
-    {format('~p~n', perform(ActionName, Target))},
     perform(ActionName, Target, P0, PN), !.
 
 parse_token(Program, _, Tokens, Tokens) :-
