@@ -1,5 +1,6 @@
 :- module(shift_reduce_parser, [parser/2, parse_tokens/3, parse_token/4]).
 
+:- use_module(grammar, []).
 :- use_module(state, []).
 :- use_module(lalr, []).
 :- use_module(item, []).
@@ -7,46 +8,10 @@
 :- use_module(symbol, []).
 :- use_module(action, []).
 :- use_module(stack, []).
-
-:- use_module(library(assoc)).
 :- use_module(table, []).
 
 parser(Grammar, parser(Grammar, Tables)) :-
-    Grammar = grammar(_Header, Assoc),
-    create_tables(Assoc, Tables).
-
-create_tables(Assoc, Tables) :-
-    get_assoc(table_counts, Assoc, [Counts]),
-    get_assoc(property, Assoc, Properties),
-    length(Properties, PropertiesCount),
-    assoc_to_list(Counts, CountsList),
-    empty_assoc(E),
-    CountsWithProperties = [property-PropertiesCount | CountsList],
-    create_tables(Assoc, CountsWithProperties, E, Tables).
-
-create_tables(Assoc, [Name-Size | Rest], Tables0, Tables) :-
-    number(Size),
-    !,
-    functor(Table, Name, Size),
-    put_assoc(Name, Tables0, Table, Tables1),
-    (   get_assoc(Name, Assoc, Items)
-    ->  forall(
-            member(Item, Items),
-            (   item:get(index, Item, Index),
-                Index1 is Index+1,
-                (    item:get_entries(Item, Entries)
-                ->   item:set_entries(Item, Entries, Item1)
-                ;    Item1 = Item
-                ),
-            % if only using setarg, it will get out of local stack
-                nb_linkarg(Index1, Table, Item1)
-            )
-              )
-    ;   true
-    ),
-    create_tables(Assoc, Rest, Tables1, Tables).
-
-create_tables(_Assoc, [], T, T).
+    grammar:create_tables(Grammar, Tables).
 
 %% parse(+Parser, +Tokens, ?Result) is det.
 %
