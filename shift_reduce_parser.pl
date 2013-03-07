@@ -79,14 +79,8 @@ next_action(program(parser(_Grammar, Tables), State, AST),
             ActionName, Target,
             Tokens, Tokens
            ) :-
-    state:current(State, lalr-LalrIndex),
     lalr:current(Tables, State, Lalr),
-    (   [Token | _] = Tokens
-    ->  Lookahead = Token
-    ;   Lookahead = none
-    ),
-    format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
-           [LalrIndex, AST, Lookahead, Lalr]),
+    debug_parsing_state(Tokens, AST, Lalr, State),
     item:get_entries(Lalr, Actions),
     (   stack:peek(AST, SymbolIndex-_Data),
         ActionName = goto,
@@ -97,6 +91,16 @@ next_action(program(parser(_Grammar, Tables), State, AST),
         symbol_to_action(Tables, SymbolIndex, Actions,
                          ActionName, Target)
     ).
+
+debug_parsing_state(Tokens, AST, Lalr, State) :-
+    state:current(State, lalr-LalrIndex),
+    (   [Token | _] = Tokens
+    ->  Lookahead = Token
+    ;   Lookahead = none
+    ),
+    format('lalr-~d ast: ~p lookahead: ~p~n\tlalr: ~p~n',
+           [LalrIndex, AST, Lookahead, Lalr]).
+
 
 symbol_to_action(Tables, SymbolIndex, Actions, ActionName, Target) :-
     symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
@@ -135,7 +139,7 @@ perform(shift, Target,
 
 perform(reduce, Target,
         program(P, State0, AST0), program(P, State1, ASTN),
-        TokenR, TokenR
+        Tokens, Tokens
        ) :-
     P = parser(_, Tables),
     table:item(rule_table, Tables, Target, Rule),
@@ -153,7 +157,7 @@ perform(reduce, Target,
     Production =.. [p | Handles],
     stack:push(AST1, HeadIndex-Production, ASTN),
     format('\t~p | ~p~n\trule: ~p~n\thead: ~p~n~n',
-           [ASTN, TokenR, Rule, Head]).
+           [ASTN, Tokens, Rule, Head]).
 
 perform(goto, Target,
         program(parser(Grammar, Tables), State0, AST),
@@ -179,7 +183,7 @@ perform(accept, _,
     format('accepted\t~p~n~n', [ASTN]).
 
 update_reduction_state(_Parser, AST, State0, State1) :-
-    % Reached the last production, so reset the LALR state
+    % TODO: Reached the last production, so reset the LALR state
     % to the initial state (here 0), should be dynamic
     (   AST = []
     ->  state:merge(State0, [lalr-0], State1)
