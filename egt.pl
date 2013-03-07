@@ -16,6 +16,9 @@ read_stream(grammar(Header, Assoc), Stream) :-
     empty_assoc(Empty),
     read_structures(Stream, Empty, Assoc).
 
+%%	read_structures(+Stream:stream)// is det.
+% This is not a dcg but rather a convenient way of passing the
+% changed AVL tress (library(assoc)).
 read_structures(Stream) -->
     read_structure(Stream),
     !,
