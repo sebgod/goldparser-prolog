@@ -10,7 +10,8 @@
 :- use_module(view_parser, []).
 
 test_data('ParserTest.egt', ['ParserTest.txt']).
-test_data('GOLD Meta-Language (2.6.0).egt', ['GOLD Meta-Language (2.6.0).grm']).
+test_data('GOLD Meta-Language (2.6.0).egt',
+          ['GOLD Meta-Language (2.6.0).grm']).
 
 test_scan(Program) :-
     test_data(GrammarFile, TestFiles),

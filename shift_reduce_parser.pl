@@ -24,9 +24,7 @@ parse_tokens(Parser, Tokens, ProgramN) :-
 reset(Parser, program(Parser, StateN, AST0)) :-
     Parser = parser(Grammar, _Tables),
     stack:empty(AST0),
-    % push the start symbol, stack:push(AST0, p(s), AST1),
-    Grammar = grammar(_Header, Assoc),
-    get_assoc(initial_states, Assoc, [State0]),
+    grammar:get_initial_states(Grammar, State0),
     state:merge(State0, [accept-false], StateN).
 
 parse_tokens(Program, Program, [], []) :- !.

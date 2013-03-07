@@ -2,6 +2,7 @@
                     get/3,
                     get_counts/2,
                     get_properties/2,
+                    get_initial_states/2,
                     items_to_list/2,
                     empty_tables/1,
                     create_tables/2
@@ -17,6 +18,9 @@ get_counts(Grammar, Counts) :-
 
 get_properties(Grammar, Properties) :-
     get(property, Grammar, Properties).
+
+get_initial_states(Grammar, State) :-
+    get(initial_states, Grammar, [State]).
 
 items_to_list(Items, ItemsList) :-
     assoc_to_list(Items, ItemsList).
