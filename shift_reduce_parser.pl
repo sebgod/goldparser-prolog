@@ -73,7 +73,13 @@ parse_tokens(Program0, ProgramN) -->
 parse_token(P0, PN) -->
     next_action(P0, ActionName, Target),
     {format('~p~n', perform(ActionName, Target))},
-    perform(ActionName, Target, P0, PN).
+    perform(ActionName, Target, P0, PN), !.
+
+parse_token(Program, _, Tokens, Tokens) :-
+    throw(error('Parsing token failed!',
+                context(parse_token//2, [Program, Tokens])
+               )
+         ).
 
 next_action(program(parser(_Grammar, Tables), State, AST),
             ActionName, Target,
