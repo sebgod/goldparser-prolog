@@ -8,64 +8,75 @@
 
 descriptor('p', property,
            [
-            (index, short),
-            (name, string),
-            (value, string)
+            short(index),
+            string(name),
+            string(value)
            ]).
 descriptor('t', table_counts,
            [
-            (symbol_table, short),
-            (character_set_table, short),
-            (rule_table, short),
-            (dfa_table, short),
-            (lalr_table, short),
-            (group_table, short)
+            short(symbol_table),
+            short(character_set_table),
+            short(rule_table),
+            short(dfa_table),
+            short(lalr_table),
+            short(group_table)
            ]).
 descriptor('I', initial_states,
-           [(dfa, short), (lalr, short)]
+           [short(dfa), short(lalr)]
           ).
 descriptor('c', character_set_table,
            [
-            (index, short),
-            (unicode_plane, short),
-            (range_count, short)
+            short(index),
+            short(unicode_plane),
+            short(range_count)
            ]).
 descriptor('S', symbol_table,
            [
-            (index, short),
-            (name, string),
-            (kind, short)
+            short(index),
+            string(name),
+            short(kind)
+           ]).
+descriptor('g', group_table,
+           [
+            short(index),
+            string(name),
+            short(container_index),
+            short(start_index),
+            short(end_index),
+            short(advance_mode),
+            short(ending_mode)
            ]).
 descriptor('R', rule_table,
            [
-            (index, short),
-            (head_index, short)
+            short(index),
+            short(head_index)
            ]).
 descriptor('D', dfa_table,
            [
-            (index, short),
-            (accept_state, boolean),
-            (accept_index, short)
+            short(index),
+            boolean(accept_state),
+            short(accept_index)
            ]).
-descriptor('L', lalr_table, [(index, short)]).
+descriptor('L', lalr_table, [short(index)]).
 
-variable_part(rule_table, [(symbol, short)]).
+variable_part(rule_table, [short(symbol)]).
 variable_part(lalr_table,
               [
-               (symbol_index, short),
-               (action, short),
-               (target, short)
+               short(symbol_index),
+               short(action),
+               short(target)
               ]).
 variable_part(dfa_table,
               [
-               (character_set_index, short),
-               (target_index, short)
+               short(character_set_index),
+               short(target_index)
               ]).
 variable_part(character_set_table,
               [
-               (start_character, short),
-               (end_character, short)
+               short(start_character),
+               short(end_character)
               ]).
+variable_part(group_table, [short(group_index)]).
 
 structure_type(Letter, Name, Props) :-
     descriptor(Letter, Name, Props),
@@ -105,8 +116,15 @@ fill_structure_rest(Rest, Key, Structure0, Structure) :-
     append(Structure0, [Record], Structure1),
     fill_structure_rest(Next, Key, Structure1, Structure).
 
-fill_structure_acc((Key, Type), ValueEntry, Key-Value) :-
-    ValueEntry =.. [Type, Value].
+fill_structure_acc(Typing, ValueEntry, Key-Value) :-
+    Typing =.. [Type, Key],
+    ValueEntry =.. [Type, Value], !.
+
+fill_structure_acc(Typing, ValueEntry, _) :-
+    throw(error('Wrong typing',
+                context(structure_type/3, [Typing, ValueEntry])
+               )
+         ).
 
 read_record(Stream, 'M', record(multitype, NumberOfEntries, Entries)) :-
     !,
