@@ -4,7 +4,7 @@
                        ]).
 
 :- use_module(portray_grammar, []).
-:- use_module(read_grammar, []).
+:- use_module(egt, []).
 :- use_module(lexer, []).
 :- use_module(shift_reduce_parser, []).
 :- use_module(view_parser, []).
@@ -23,7 +23,7 @@ test_scan(GrammarFile, TestFiles, Program) :-
     scan_and_parse(Parser, TestFile, Program).
 
 load_parser(File, Parser) :-
-    read_grammar:read_file(Grammar, File),
+    egt:read_file(Grammar, File),
     shift_reduce_parser:parser(Grammar, Parser).
 
 test_view(File, _Tokens, _Program) :-

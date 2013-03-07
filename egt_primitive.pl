@@ -1,4 +1,4 @@
-:- module(read_primitive, [
+:- module(egt_primitive, [
                read_boolean/2,
                read_ascii_char/2,
                read_utf16le_z/2,

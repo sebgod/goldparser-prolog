@@ -1,9 +1,9 @@
-:- module(read_multitype, [
+:- module(egt_record, [
                sort_record/3,
                read_record/3
               ]).
 
-:- use_module(read_primitive).
+:- use_module(egt_primitive, []).
 :- use_module(support).
 
 descriptor('p', property,
@@ -110,7 +110,7 @@ fill_structure_acc((Key, Type), ValueEntry, Key-Value) :-
 
 read_record(Stream, 'M', record(multitype, NumberOfEntries, Entries)) :-
     !,
-    read_ushort(Stream, NumberOfEntries),
+    egt_primitive:read_ushort(Stream, NumberOfEntries),
     read_multitype_entries(Stream, NumberOfEntries, Entries).
 
 read_record(_Stream, Unknown, _Record) :-
@@ -118,7 +118,7 @@ read_record(_Stream, Unknown, _Record) :-
 
 read_multitype_entries(Stream, NumberOfEntries, [Entry | Entries]) :-
     NumberOfEntries > 0,
-    read_ascii_char(Stream, Type),
+    egt_primitive:read_ascii_char(Stream, Type),
     !,
     read_multitype_entry(Stream, Type, Entry),
     Remain is NumberOfEntries - 1,
@@ -128,16 +128,16 @@ read_multitype_entries(_, 0, []).
 read_multitype_entry(_Stream, 'E', empty) :- !.
 
 read_multitype_entry(Stream, 'B', boolean(Bool)) :- !,
-    read_boolean(Stream, Bool).
+    egt_primitive:read_boolean(Stream, Bool).
 
 read_multitype_entry(Stream, 'b', byte(Byte)) :- !,
-    read_byte(Stream, Byte).
+    egt_primitive:read_byte(Stream, Byte).
 
 read_multitype_entry(Stream, 'I', short(Short)) :- !,
-    read_ushort(Stream, Short).
+    egt_primitive:read_ushort(Stream, Short).
 
 read_multitype_entry(Stream, 'S', string(String)) :- !,
-    read_utf16le_z(Stream, String).
+    egt_primitive:read_utf16le_z(Stream, String).
 
 read_multitype_entry(_Stream, Unknown, _Parsed) :- !,
     throw(error('Unknown multitype',
