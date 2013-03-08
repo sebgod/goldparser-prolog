@@ -103,7 +103,7 @@ perform(shift, Target,
     !,
     state:merge(State0, [lalr-Target], StateN),
     stack:push(AST0, Token, ASTN),
-    format('\t~p | ~p~n~n', [ASTN, TokenR]).
+    format('shift: \t~p | ~p~n~n', [ASTN, TokenR]).
 
 perform(reduce, Target,
         program(P, State0, AST0), program(P, State1, ASTN),

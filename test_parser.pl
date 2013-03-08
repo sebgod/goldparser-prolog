@@ -9,8 +9,7 @@
 :- use_module(shift_reduce_parser, []).
 :- use_module(view_parser, []).
 
-test_data('GOLD Meta-Language (2.6.0).egt',
-          ['Test.grm']).
+test_data('GOLD Meta-Language (2.6.0).egt', ['ParserTest.txt']).
 %test_data('ParserTest.egt', ['ParserTest.txt']).
 
 test_scan(Program) :-
@@ -36,8 +35,8 @@ test_view(File, _Tokens, _Program) :-
 scan_and_parse(Parser, File, ProgramN) :-
     shift_reduce_parser:reset(Parser, Program0),
     lexer:scan_file(Program0, Tokens, File),
-    ProgramN = Tokens.
-    %shift_reduce_parser:parse_tokens(Parser, Tokens, ProgramN).
+    ProgramN = Tokens,
+    shift_reduce_parser:parse_tokens(Parser, Tokens, ProgramN).
 
 
 

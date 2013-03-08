@@ -2,17 +2,23 @@
 
 :- use_module(library(assoc)).
 
-user:portray(parser(Grammar, Tables)) :-
-    Grammar = grammar(header(Header), Assoc),
-    format('Version: ~w~n', [Header]),
-    (   current_prolog_flag(debug, false)
-    ->  print_tables(Tables),
-        assoc_to_keys(Assoc, AssocKeys),
-        assoc_to_keys(Tables, TableKeys),
-        ord_subtract(AssocKeys, TableKeys, Other),
-        print_assoc_items(Assoc, Other)
-    ;   true
-    ).
+user:portray(parser(Grammar, _Tables)) :-
+    Grammar = grammar(header(Header), _Assoc),
+    format('Version: ~w~n', [Header]).
+
+user:portray(Assoc) :- is_assoc(Assoc).
+
+%    get_assoc(table_counts, Assoc, [Counts]),
+%    print(Counts).
+
+%    ->  print_tables(Tables),
+%        assoc_to_keys(Assoc, AssocKeys),
+%        assoc_to_keys(Tables, TableKeys),
+%        ord_subtract(AssocKeys, TableKeys, Other),
+%        print_assoc_items(Assoc, Other)
+%    ;   true
+%    ).
+
 
 user:portray('_entries'-Entries) :-
     Space = '        ',
@@ -39,9 +45,10 @@ user:portray(Atom) :-
     atom(Atom),
     write_canonical(Atom).
 
-user:portray(Assoc) :-
-    assoc_to_list(Assoc, List),
-    format('t~p', [List]).
+
+%user:portray(Assoc) :-
+%    assoc_to_list(Assoc, List),
+%    format('t~p', [List]).
 
 print_tables(Tables) :-
     forall(gen_assoc(KTable, Tables, VTable),
