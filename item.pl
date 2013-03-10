@@ -1,13 +1,20 @@
 :- module(item, [
+                 empty/1,
                  get/3,
                  set/4,
                  get_entries/2,
                  set_entries/3,
                  entries_to_list/2,
-                 entry_members/3,
+                 entry_member/3,
                  entries/3,
-                 entry_size/2
+                 entry_size/2,
+                 merge/3
                 ]).
+
+:- use_module(library(assoc)).
+
+empty(Item) :-
+    empty_assoc(Item).
 
 get(Name, Item, Value) :-
     get_assoc(Name, Item, Value).
@@ -34,13 +41,13 @@ entries_to_list(Entries, Entries) :-
 entries_to_list(EntryTerm, Entries) :-
     EntryTerm =.. [entries | Entries].
 
-entry_members(Entries, Entry, EntryIndex) :-
+entry_member(Entries, Entry, EntryIndex) :-
     arg(ArgIndex, Entries, Entry),
     EntryIndex is ArgIndex - 1.
 
 entries(Item, Entry, EntryIndex) :-
     get_entries(Item, Entries),
-    entry_members(Entries, Entry, EntryIndex).
+    entry_member(Entries, Entry, EntryIndex).
 
 entry_size(Entries, Size) :-
     functor(Entries, entries, Size), !.
@@ -48,7 +55,6 @@ entry_size(Entries, Size) :-
 entry_size(Entries, Size) :-
     length(Entries, Size), !.
 
-
-
-
+merge(Key-Value, Item0, ItemN) :-
+    set(Key, Item0, Value, ItemN).
 

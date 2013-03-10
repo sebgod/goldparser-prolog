@@ -18,11 +18,7 @@ current(State, Kind-KindState) :-
 current_list(State, List) :-
     maplist(current(State), List).
 
-% for now, SWI prolog xref is broken, and will not detect this call
-merge_(Kind-KindState, State, NewState) :-
-    item:set(Kind, State, KindState, NewState).
-
 merge(State, Updates, NewState) :-
-    foldl(merge_, Updates, State, NewState).
+    foldl(item:merge, Updates, State, NewState).
 
 

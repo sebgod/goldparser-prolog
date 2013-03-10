@@ -23,11 +23,17 @@ parse_tokens(Parser, Tokens, ProgramN) :-
     reset(Parser, Program0),
     phrase(parse_tokens(Program0, ProgramN), Tokens, []).
 
+actions(Tables, State, Actions) :-
+    lalr:current(Tables, State, Lalr),
+    item:get_entries(Lalr, Actions).
+
 reset(Parser, program(Parser, StateN, AST0)) :-
-    Parser = parser(Grammar, _Tables),
+    Parser = parser(Grammar,Tables),
     stack:empty(AST0),
     grammar:get_initial_states(Grammar, State0),
-    state:merge(State0, [accept-false, step_count-0], StateN).
+    actions(Tables, State0, Actions),
+    action:init_gotos(Actions, Gotos),
+    state:merge(State0, [accept-false, step_count-0, goto-Gotos], StateN).
 
 :- if(current_prolog_flag(debug, true)).
 %% debug_parser_step(+P0, +PN, +ActionName, +Actions, +Target) is det.
@@ -40,7 +46,7 @@ debug_parser_step(
     ),
     state:current(State0, lalr-Lalr0),
     state:current(StateN, lalr-LalrN),
-    forall(item:entry_members(Actions, Action, _),
+    forall(item:entry_member(Actions, Action, _),
            debug(parser, '~p', Action)
           ),
     debug(Topic, '~p', parser_step(P0, P1,
@@ -99,8 +105,7 @@ next_action(program(Parser, State, _AST),
             Tokens, Tokens
            ) :-
     Parser = parser(_Grammar, Tables),
-    lalr:current(Tables, State, Lalr),
-    item:get_entries(Lalr, Actions),
+    actions(Tables, State, Actions),
     lookahead(Tokens, SymbolIndex),
     symbol_to_action(Tables, SymbolIndex, Actions,
                      ActionName, Target).
@@ -135,7 +140,9 @@ perform(shift, Actions, Target,
         [Token | TokenR], TokenR
        ) :-
     !,
-    state:merge(State0, [lalr-Target, goto-Actions], StateN),
+    state:current(State0, goto-Goto0),
+    action:update_gotos(Actions, Goto0, Goto1),
+    state:merge(State0, [lalr-Target, goto-Goto1], StateN),
     stack:push(AST0, Token, ASTN).
 
 perform(reduce, _Actions, Target,
@@ -156,7 +163,7 @@ perform(reduce, _Actions, Target,
     item:get(name, Head, HeadName),
     Production =.. [HeadName | Handles],
     stack:push(AST1, HeadIndex-Production, ASTN),
-    update_reduction_state(Tables, AST1, ASTN, State0, State1).
+    update_reduction_state(Parser, AST1, ASTN, State0, State1).
 
 perform(goto, _Actions, Target,
         program(parser(Grammar, Tables), State0, AST),
@@ -178,16 +185,21 @@ perform(accept, _Actions, _Target,
     state:merge(State0, [accept-Accept], StateN),
     ASTN = AST0.
 
-update_reduction_state(Tables, AST0, ASTN, State0, State1) :-
-    % TODO: Reached the last production, so reset the LALR state
-    % to the initial state (here 0), should be dynamic
+update_reduction_state(parser(_Grammar, _Tables),
+                       AST0, ASTN,
+                       State0, State1) :-
+% TODO: Reached the last production, so reset the LALR state
+% to the initial state (here 0), should be dynamic
     (   AST0 = []
     ->  TargetLalr = 0
-    ;   state:current(State0, goto-Actions),
-        stack:peek(ASTN, SymbolIndex-_Data),
-        (   symbol_to_action(Tables, SymbolIndex, Actions, goto, Goto)
+    ;   (
+            state:current(State0, goto-Gotos),
+            stack:peek(ASTN, SymbolIndex-_Data),
+            item:get(SymbolIndex, Gotos, Goto)
         ->  TargetLalr = Goto
-        ;   state:current(State0, lalr-TargetLalr)
+        ;   state:current(State0, goto-Gotos),
+            debug(parser, '~p', goto(Gotos)),
+            state:current(State0, lalr-TargetLalr)
         )
     ),
     state:merge(State0, [lalr-TargetLalr], State1).
