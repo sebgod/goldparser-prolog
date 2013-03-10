@@ -1,2 +1,1 @@
-"Name"         = 'GOLD Meta-Language'
-
+A = B + C*2

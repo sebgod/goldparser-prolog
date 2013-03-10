@@ -5,9 +5,9 @@
                  ]).
 
 :- use_module(support).
-:- use_module(table, []).
-:- use_module(state, []).
-:- use_module(dfa, []).
+:- use_module(table,  []).
+:- use_module(state,  []).
+:- use_module(dfa,    []).
 :- use_module(symbol, []).
 
 scan_file(Program, Tokens, File) :-
@@ -35,7 +35,11 @@ scan_list_(Parser, State, [ Token | TRest ], Input) :-
         format(atom(Error), '~w', [FailedInput]),
         Token = Index-Error
     ),
+    debug_token_read(Parser, Token),
     scan_list_(Parser, State, TRest, InputR).
+
+debug_token_read(Parser, Token) :-
+    debug(lexer, '~p', parser_step(Parser, token, Token, _)).
 
 try_restore_input([], [], []).
 try_restore_input([Skipped | InputR], Skipped, InputR).

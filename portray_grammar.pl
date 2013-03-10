@@ -2,9 +2,21 @@
 
 :- use_module(library(assoc)).
 
+:- multifile user:message_hook/3.
+
+:- multifile user:portray/1.
+
+user:message_hook(Term, Kind, ['~p'-Term, nl]) :-
+    format('t: ~p k: ~p', [Term, Kind]),
+    Term = parser_step(_, _, _, _,_).
+
+user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
+    %table:item(lalr_table, Tables, Target, Lalr),
+    format('~p\t~p\t~p~n', [Action, Value, Lalr]).
+
 user:portray(parser(Grammar, _Tables)) :-
     Grammar = grammar(header(Header), _Assoc),
-    format('Version: ~w~n', [Header]).
+    format('version(~w)', [Header]).
 
 user:portray(Assoc) :- is_assoc(Assoc).
 
@@ -27,19 +39,19 @@ user:portray('_entries'-Entries) :-
     forall(member(Entry, Rest), format(',~n~w~p', [Space, Entry])),
     format('~n~w)', [Space]).
 
-user:portray(action-1) :- write(action-shift).
-user:portray(action-2) :- write(action-reduce).
-user:portray(action-3) :- write(action-goto).
-user:portray(action-4) :- write(action-accept).
+user:portray(action-1) :- write(shift).
+user:portray(action-2) :- write(reduce).
+user:portray(action-3) :- write(goto).
+user:portray(action-4) :- write(accept).
 
-user:portray(kind-0) :- write(kind-nonterminal).
-user:portray(kind-1) :- write(kind-terminal).
-user:portray(kind-2) :- write(kind-noise).
-user:portray(kind-3) :- write(kind-eof).
-user:portray(kind-4) :- write(kind-group_start).
-user:portray(kind-5) :- write(kind-group_end).
-user:portray(kind-6) :- write(kind-decremented).
-user:portray(kind-7) :- write(kind-error).
+user:portray(kind-0) :- write(nonterminal).
+user:portray(kind-1) :- write(terminal).
+user:portray(kind-2) :- write(noise).
+user:portray(kind-3) :- write(eof).
+user:portray(kind-4) :- write(group_start).
+user:portray(kind-5) :- write(group_end).
+user:portray(kind-6) :- write(decremented).
+user:portray(kind-7) :- write(error).
 
 user:portray(Atom) :-
     atom(Atom),
