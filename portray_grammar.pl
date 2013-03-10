@@ -18,19 +18,10 @@ user:portray(parser(Grammar, _Tables)) :-
     Grammar = grammar(header(Header), _Assoc),
     format('version(~w)', [Header]).
 
-user:portray(Assoc) :- is_assoc(Assoc).
-
-%    get_assoc(table_counts, Assoc, [Counts]),
-%    print(Counts).
-
-%    ->  print_tables(Tables),
-%        assoc_to_keys(Assoc, AssocKeys),
-%        assoc_to_keys(Tables, TableKeys),
-%        ord_subtract(AssocKeys, TableKeys, Other),
-%        print_assoc_items(Assoc, Other)
-%    ;   true
-%    ).
-
+user:portray(Assoc) :-
+    assoc_to_list(Assoc, List),
+    write('t'),
+    print(List).
 
 user:portray('_entries'-Entries) :-
     Space = '        ',
@@ -56,28 +47,4 @@ user:portray(kind-7) :- write(error).
 user:portray(Atom) :-
     atom(Atom),
     write_canonical(Atom).
-
-
-%user:portray(Assoc) :-
-%    assoc_to_list(Assoc, List),
-%    format('t~p', [List]).
-
-print_tables(Tables) :-
-    forall(gen_assoc(KTable, Tables, VTable),
-           (   VTable =.. [_ | VTableList],
-               print_list_vertical(KTable, VTableList)
-           )
-          ).
-
-print_assoc_items(Assoc, List) :-
-    forall(member(Item, List),
-           (   get_assoc(Item, Assoc, Values),
-               print_list_vertical(Item, Values)
-           )
-          ).
-
-print_list_vertical(Name, List) :-
-    length(List, Length),
-    format('~w: ~d~n', [Name, Length]),
-    forall(member(Value, List), format('    ~p~n', [Value])).
 
