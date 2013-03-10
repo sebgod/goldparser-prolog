@@ -30,16 +30,19 @@ reset(Parser, program(Parser, StateN, AST0)) :-
     state:merge(State0, [accept-false, step_count-0], StateN).
 
 :- if(current_prolog_flag(debug, true)).
-%% debug_parser_step(+P0, +PN, +ActionName, +Target) is det.
+%% debug_parser_step(+P0, +PN, +ActionName, +Actions, +Target) is det.
 debug_parser_step(
     program(P0, State0, _AST0),
-    program(P1, StateN, _AST1), ActionName, Target) :-
+    program(P1, StateN, _AST1), ActionName, Actions, Target) :-
     (   ActionName == skip
     ->  Topic = parser(detail)
     ;   Topic = parser
     ),
     state:current(State0, lalr-Lalr0),
     state:current(StateN, lalr-LalrN),
+    forall(item:entry_members(Actions, Action, _),
+           debug(parser, '~p', Action)
+          ),
     debug(Topic, '~p', parser_step(P0, P1,
                                    ActionName, Target, Lalr0-LalrN)).
 
@@ -67,7 +70,7 @@ parse_tokens(Program, Program) -->
 
 
 :- else.
-debug_parser_step(_, _, _, _).
+debug_parser_step(_, _, _, _, _).
 debug_increase_counter(Program, _, Program).
 :- endif.
 
@@ -83,7 +86,7 @@ parse_token(P0, PN) -->
     perform(ActionName, Actions, Target, P0, P1),
     {
      debug_increase_counter(P1, step_count, PN),
-     debug_parser_step(P0, PN, ActionName, Target)
+     debug_parser_step(P0, PN, ActionName, Actions, Target)
     },
     !.
 
