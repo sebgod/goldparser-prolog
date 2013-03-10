@@ -9,7 +9,7 @@
 :- use_module(shift_reduce_parser, []).
 :- use_module(view_parser, []).
 
-%test_files('GOLD Meta-Language (2.6.0).egt', ['GrammarTest.txt']).
+test_files('GOLD Meta-Language (2.6.0).egt', ['GrammarTest.txt']).
 test_files('ParserTest.egt', ['ParserTest.txt']).
 
 test_scan(Program) :-

@@ -163,7 +163,7 @@ perform(reduce, _Actions, Target,
     item:get(name, Head, HeadName),
     Production =.. [HeadName | Handles],
     stack:push(AST1, HeadIndex-Production, ASTN),
-    update_reduction_state(Parser, AST1, ASTN, State0, State1).
+    update_reduction_state(ASTN, State0, State1).
 
 perform(goto, _Actions, Target,
         program(parser(Grammar, Tables), State0, AST),
@@ -185,22 +185,14 @@ perform(accept, _Actions, _Target,
     state:merge(State0, [accept-Accept], StateN),
     ASTN = AST0.
 
-update_reduction_state(parser(_Grammar, _Tables),
-                       AST0, ASTN,
-                       State0, State1) :-
-% TODO: Reached the last production, so reset the LALR state
-% to the initial state (here 0), should be dynamic
-    (   AST0 = []
-    ->  TargetLalr = 0
-    ;   (
-            state:current(State0, goto-Gotos),
-            stack:peek(ASTN, SymbolIndex-_Data),
-            item:get(SymbolIndex, Gotos, Goto)
-        ->  TargetLalr = Goto
-        ;   state:current(State0, goto-Gotos),
-            debug(parser, '~p', goto(Gotos)),
-            state:current(State0, lalr-TargetLalr)
-        )
+update_reduction_state(ASTN, State0, State1) :-
+    (   state:current(State0, goto-Gotos),
+        stack:peek(ASTN, SymbolIndex-_Data),
+        item:get(SymbolIndex, Gotos, Goto)
+    ->  TargetLalr = Goto
+    ;   state:current(State0, goto-Gotos),
+        debug(parser, '~p', goto(Gotos)),
+        state:current(State0, lalr-TargetLalr)
     ),
     state:merge(State0, [lalr-TargetLalr], State1).
 
