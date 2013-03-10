@@ -27,7 +27,7 @@ reset(Parser, program(Parser, StateN, AST0)) :-
     Parser = parser(Grammar, _Tables),
     stack:empty(AST0),
     grammar:get_initial_states(Grammar, State0),
-    state:merge(State0, [accept-false, action_count-0], StateN).
+    state:merge(State0, [accept-false, step_count-0], StateN).
 
 :- if(current_prolog_flag(debug, true)).
 %% debug_parser_step(+P0, +PN, +ActionName, +Target) is det.
@@ -51,17 +51,17 @@ debug_increase_counter(
     Counter,
     program(Parser, StateN, AST)
                       ) :-
-    debug_get_counter(State0, action_count-ActionCount),
+    debug_get_counter(State0, step_count-ActionCount),
     ActionCount1 is ActionCount + 1,
     state:merge(State0, [Counter-ActionCount1], StateN).
 
 parse_tokens(Program, Program) -->
     {
      Program = program(_, State, _),
-     debug_get_counter(State, action_count-ActionCount),
-     (   ActionCount >= 100
+     debug_get_counter(State, step_count-StepCount),
+     (   StepCount >= 100
      ->  !,
-         debug(parser, 'action count >= ~w', ActionCount)
+         debug(parser, 'action count >= ~w', StepCount)
      )
     }.
 
@@ -82,7 +82,7 @@ parse_token(P0, PN) -->
     next_action(P0, ActionName, Actions, Target),
     perform(ActionName, Actions, Target, P0, P1),
     {
-     debug_increase_counter(P1, action_count, PN),
+     debug_increase_counter(P1, step_count, PN),
      debug_parser_step(P0, PN, ActionName, Target)
     },
     !.
