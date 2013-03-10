@@ -62,8 +62,11 @@ update_gotos(Actions, Gotos0, GotosN) :-
             ), GotoList),
     (   GotoList = []
     ->  GotosN = Gotos0
-    ;   foldl(item:merge, GotoList, Gotos0, GotosN),
-        debug(parser, '~p', gotosN(GotosN))
+    ;   foldl(item:merge_replace, GotoList, Gotos0, GotosN),
+        (   Gotos0 \= GotosN
+        ->  debug(parser, '~p', gotos(Gotos0-GotosN))
+        ;   debug(parser, '~p', gotos_unchanged(Gotos0))
+        )
     ).
 
 

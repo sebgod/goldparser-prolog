@@ -19,6 +19,6 @@ current_list(State, List) :-
     maplist(current(State), List).
 
 merge(State, Updates, NewState) :-
-    foldl(item:merge, Updates, State, NewState).
+    foldl(item:merge_replace, Updates, State, NewState).
 
 

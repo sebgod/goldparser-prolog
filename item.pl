@@ -8,7 +8,8 @@
                  entry_member/3,
                  entries/3,
                  entry_size/2,
-                 merge/3
+                 merge_keep/3,
+                 merge_replace/3
                 ]).
 
 :- use_module(library(assoc)).
@@ -55,6 +56,12 @@ entry_size(Entries, Size) :-
 entry_size(Entries, Size) :-
     length(Entries, Size), !.
 
-merge(Key-Value, Item0, ItemN) :-
+merge_keep(Key-Value, Item0, ItemN) :-
+    (   get(Key, Item0, _Keep)
+    ->  ItemN = Item0
+    ;   set(Key, Item0, Value, ItemN)
+    ).
+
+merge_replace(Key-Value, Item0, ItemN) :-
     set(Key, Item0, Value, ItemN).
 
