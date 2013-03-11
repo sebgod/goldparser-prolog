@@ -1,9 +1,7 @@
 :- module(action, [
                    type/2,
                    find/3,
-                   list/2,
-                   init_gotos/2,
-                   update_gotos/3
+                   list/2
                   ]).
 
 :- use_module(item, []).
@@ -39,7 +37,6 @@ type(2, reduce).
 type(3, goto).
 type(4, accept).
 
-
 find(Actions, SymbolIndex, Action) :-
     once((item:entry_member(Actions, Action, _ActionIndex),
           item:get(symbol_index, Action, SymbolIndex)
@@ -47,27 +44,6 @@ find(Actions, SymbolIndex, Action) :-
 
 list(Actions, List) :-
     item:entries_to_list(Actions, List).
-
-init_gotos(Actions, GotosN) :-
-    item:empty(Gotos0),
-    update_gotos(Actions, Gotos0, GotosN).
-
-update_gotos(Actions, Gotos0, GotosN) :-
-    type(GotoType, goto),
-    findall(SymbolIndex-Target,
-            (item:entry_member(Actions, Action, _),
-             item:get(action, Action, GotoType),
-             item:get(symbol_index, Action, SymbolIndex),
-             item:get(target, Action, Target)
-            ), GotoList),
-    (   GotoList = []
-    ->  GotosN = Gotos0
-    ;   foldl(item:merge_replace, GotoList, Gotos0, GotosN),
-        (   Gotos0 \= GotosN
-        ->  debug(parser, '~p', gotos(Gotos0-GotosN))
-        ;   debug(parser, '~p', gotos_unchanged(Gotos0))
-        )
-    ).
 
 
 
