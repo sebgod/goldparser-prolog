@@ -4,6 +4,7 @@
 :- use_module(state,   []).
 :- use_module(item,    []).
 :- use_module(table,   []).
+:- use_module(lalr,    []).
 :- use_module(symbol,  []).
 :- use_module(action,  []).
 :- use_module(stack,   []).
@@ -28,46 +29,23 @@ reset(Parser, program(Parser, StateN, ASTN)) :-
     state:current(State0, lalr-Lalr),
     stack:empty(AST0),
     stack:push(AST0, s(Lalr, start-''), ASTN),
-    state:merge(State0, [accept-false, step_count-0], StateN).
+    state:merge(State0, [accept-false], StateN).
 
 :- if(current_prolog_flag(debug, true)).
 %% debug_parser_step(+P0, +PN, +ActionName, +Target) is det.
 debug_parser_step(
-    program(P0, State0, _AST0),
-    program(P1, StateN, _AST1), ActionName, Target) :-
+    program(P0, _State0, AST0),
+    program(P1, _StateN, AST1), ActionName, Target) :-
     (   ActionName == skip
     ->  Topic = parser(detail)
     ;   Topic = parser
     ),
-    state:current(State0, lalr-Lalr0),
-    state:current(StateN, lalr-LalrN),
+    lalr:index(AST0, Lalr0),
+    lalr:index(AST1, LalrN),
     debug(Topic, '~p', parser_step(P0, P1,
                                    ActionName, Target, Lalr0-LalrN)).
-
-debug_get_counter(State, Counter-Count) :-
-    state:current(State, Counter-Count).
-
-debug_increase_counter(
-    program(Parser, State0, AST),
-    Counter,
-    program(Parser, StateN, AST)
-                      ) :-
-    debug_get_counter(State0, step_count-ActionCount),
-    ActionCount1 is ActionCount + 1,
-    state:merge(State0, [Counter-ActionCount1], StateN).
-
-parse_tokens(Program, Program) -->
-    {
-     Program = program(_, State, _),
-     debug_get_counter(State, step_count-StepCount),
-     (   StepCount >= 100
-     ->  !,
-         debug(parser, 'action count >= ~w', StepCount)
-     )
-    }.
 :- else.
 debug_parser_step(_, _, _, _).
-debug_increase_counter(Program, _, Program).
 :- endif.
 
 parse_tokens(Program, Program, [], []) :- !.
@@ -78,9 +56,8 @@ parse_tokens(Program0, ProgramN) -->
 
 parse_token(P0, PN) -->
     next_action(P0, ActionName, Target),
-    perform(ActionName, Target, P0, P1),
+    perform(ActionName, Target, P0, PN),
     {
-     debug_increase_counter(P1, step_count, PN),
      debug_parser_step(P0, PN, ActionName, Target)
     },
     !.
@@ -89,12 +66,12 @@ parse_token(_P0, _P1, Tokens, Tokens) :-
     throw(error(representation_error('unexpected token'),
                 context(parse_token//2, Tokens))).
 
-next_action(program(Parser, State, _AST),
+next_action(program(Parser, _State, AST),
             ActionName, Target,
             Tokens, Tokens
            ) :-
     Parser = parser(_Grammar, Tables),
-    state:current_item(Tables, State, lalr-lalr_table, Lalr),
+    lalr:get(Tables, AST, Lalr),
     item:get_entries(Lalr, Actions),
     lookahead(Tokens, SymbolIndex),
     symbol_to_action(Tables, SymbolIndex, Actions,
@@ -125,17 +102,16 @@ symbol_type_to_action(SymbolType-SymbolIndex,
 perform(skip, _Target, P, P, [_Skipped | TokenR], TokenR).
 
 perform(shift, Target,
-        program(parser(Grammar, Tables), State0, AST0),
-        program(parser(Grammar, Tables), StateN, ASTN),
+        program(parser(Grammar, Tables), State, AST0),
+        program(parser(Grammar, Tables), State, ASTN),
         [Token | TokenR], TokenR
        ) :-
     !,
-    state:merge(State0, [lalr-Target], StateN),
     stack:push(AST0, s(Target, Token), ASTN).
 
 perform(reduce, Target,
-        program(Parser, State0, AST0),
-        program(Parser, StateN, ASTN),
+        program(Parser, State, AST0),
+        program(Parser, State, ASTN),
         Tokens, Tokens
        ) :-
     Parser = parser(_, Tables),
@@ -151,7 +127,7 @@ perform(reduce, Target,
     stack:rpop(AST0, RuleSymbolSize, Handles, AST1),
     item:get(name, Head, HeadName),
     Production =.. [HeadName | Handles],
-    update_reduction_state(Tables, HeadIndex-Production,  AST1, ASTN, State0, StateN).
+    update_reduction_state(Tables, HeadIndex-Production,  AST1, ASTN).
 
 perform(accept, _Target,
         program(parser(Grammar, Tables), State0, AST0),
@@ -159,20 +135,21 @@ perform(accept, _Target,
         Tokens, TokensR) :-
     (   [SymbolIndex-_ | TokensR] = Tokens,
         symbol:by_type_name(Tables, eof, SymbolIndex, _),
+        stack:pop(AST0, Reduction, AST1),
+        stack:pop(AST1, s(InitLalr, start-_), AST2),
+        stack:push(AST2, s(InitLalr, Reduction), ASTN),
         TokensR = []
     ->  Accept = true
-    ;   Accept = false
+    ;   Accept = false,
+        ASTN = AST0
     ),
-    state:merge(State0, [accept-Accept], StateN),
-    ASTN = AST0.
+    state:merge(State0, [accept-Accept], StateN).
 
-update_reduction_state(Tables, HeadIndex-Production, AST0, ASTN, State0, StateN) :-
-    stack:peek(AST0, s(LalrIndexPrev, _)),
-    table:item(lalr_table, Tables, LalrIndexPrev, LalrPrev),
+update_reduction_state(Tables, HeadIndex-Production, AST0, ASTN) :-
+    lalr:get(Tables, AST0, LalrPrev),
     item:get_entries(LalrPrev, Actions),
     symbol_to_action(Tables, HeadIndex, Actions, goto, Goto),
-    stack:push(AST0, s(Goto, HeadIndex-Production), ASTN),
-    state:merge(State0, [lalr-Goto], StateN).
+    stack:push(AST0, s(Goto, HeadIndex-Production), ASTN).
 
 
 
