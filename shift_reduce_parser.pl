@@ -27,10 +27,12 @@ actions(Tables, State, Actions) :-
     lalr:current(Tables, State, Lalr),
     item:get_entries(Lalr, Actions).
 
-reset(Parser, program(Parser, StateN, AST0)) :-
+reset(Parser, program(Parser, StateN, ASTN)) :-
     Parser = parser(Grammar, Tables),
-    stack:empty(AST0),
     grammar:get_initial_states(Grammar, State0),
+    state:current(State0, lalr-Lalr),
+    stack:empty(AST0),
+    stack:push(AST0, s(Lalr, start-''), ASTN),
     actions(Tables, State0, Actions),
     action:init_gotos(Actions, Gotos),
     state:merge(State0, [accept-false, step_count-0, goto-Gotos], StateN).
@@ -70,8 +72,6 @@ parse_tokens(Program, Program) -->
          debug(parser, 'action count >= ~w', StepCount)
      )
     }.
-
-
 :- else.
 debug_parser_step(_, _, _, _).
 debug_increase_counter(Program, _, Program).
