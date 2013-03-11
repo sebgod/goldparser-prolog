@@ -2,7 +2,6 @@
 
 :- use_module(grammar, []).
 :- use_module(state,   []).
-:- use_module(lalr,    []).
 :- use_module(item,    []).
 :- use_module(table,   []).
 :- use_module(symbol,  []).
@@ -95,7 +94,7 @@ next_action(program(Parser, State, _AST),
             Tokens, Tokens
            ) :-
     Parser = parser(_Grammar, Tables),
-    lalr:current(Tables, State, Lalr),
+    state:current_item(Tables, State, lalr-lalr_table, Lalr),
     item:get_entries(Lalr, Actions),
     lookahead(Tokens, SymbolIndex),
     symbol_to_action(Tables, SymbolIndex, Actions,
@@ -168,8 +167,9 @@ perform(accept, _Target,
     ASTN = AST0.
 
 update_reduction_state(Tables, HeadIndex-Production, AST0, ASTN, State0, StateN) :-
-    stack:peek(AST0, s(PreviousLalr, _)),
-    item:get_entries(PreviousLalr, Actions),
+    stack:peek(AST0, s(LalrIndexPrev, _)),
+    table:item(lalr_table, Tables, LalrIndexPrev, LalrPrev),
+    item:get_entries(LalrPrev, Actions),
     symbol_to_action(Tables, HeadIndex, Actions, goto, Goto),
     stack:push(AST0, s(Goto, HeadIndex-Production), ASTN),
     state:merge(State0, [lalr-Goto], StateN).
