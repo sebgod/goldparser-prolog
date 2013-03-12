@@ -1,6 +1,8 @@
 :- module(portray_grammar, []).
 
 :- use_module(library(assoc)).
+:- use_module(grammar, []).
+:- use_module(item, []).
 
 :- multifile user:message_hook/3.
 
@@ -16,7 +18,14 @@ user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
 
 user:portray(parser(Grammar, _Tables)) :-
     Grammar = grammar(header(Header), _Assoc),
-    format('version(~w)', [Header]).
+    grammar:get_properties(Grammar, Props),
+    forall(member(Property, Props),
+          (   item:get(name, Property, Name),
+              item:get(value, Property, Value),
+              format(' ~w: ~w', [Name, Value])
+          )
+          ),
+    format(' version: ~w', [Header]).
 
 user:portray(Assoc) :-
     assoc_to_list(Assoc, List),
