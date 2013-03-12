@@ -126,8 +126,8 @@ perform(reduce, Target,
     item:entry_size(RuleSymbols, RuleSymbolSize),
     stack:rpop(AST0, RuleSymbolSize, Handles, AST1),
     item:get(name, Head, HeadName),
-    Production =.. [HeadName | Handles],
-    update_reduction_state(Tables, HeadIndex-Production,  AST1, ASTN).
+    Reduction =.. [HeadName | Handles],
+    update_reduction_state(Tables, HeadIndex-Reduction,  AST1, ASTN).
 
 perform(accept, _Target,
         program(parser(Grammar, Tables), State0, AST0),
@@ -145,11 +145,11 @@ perform(accept, _Target,
     ),
     state:merge(State0, [accept-Accept], StateN).
 
-update_reduction_state(Tables, HeadIndex-Production, AST0, ASTN) :-
+update_reduction_state(Tables, HeadIndex-Reduction, AST0, ASTN) :-
     lalr:get(Tables, AST0, LalrPrev),
     item:get_entries(LalrPrev, Actions),
     symbol_to_action(Tables, HeadIndex, Actions, goto, Goto),
-    stack:push(AST0, s(Goto, HeadIndex-Production), ASTN).
+    stack:push(AST0, s(Goto, HeadIndex-Reduction), ASTN).
 
 
 
