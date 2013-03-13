@@ -63,8 +63,10 @@ parse_token(P0, PN) -->
     !.
 
 parse_token(_P0, _P1, Tokens, Tokens) :-
+    [SymbolType-Data | _] = Tokens,
+    symbol:type(SymbolType, SymbolTypeName),
     throw(error(representation_error('unexpected token'),
-                context(parse_token//2, Tokens))).
+                context(parse_token//2, SymbolTypeName-Data))).
 
 next_action(program(Parser, _State, AST),
             ActionName, Target,
