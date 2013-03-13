@@ -10,8 +10,8 @@
 :- use_module(state, []).
 :- use_module(charset, []).
 
-current(Tables, State, DFA) :-
-    state:current_item(Tables, State, dfa-dfa_table, DFA).
+current(Tables, Index, DFA) :-
+    table:item(dfa_table, Tables, Index, DFA).
 
 accept(DFA, Accept) :-
     (    item:get(accept_state, DFA, true)
