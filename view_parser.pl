@@ -2,6 +2,8 @@
 :- module(view_parser,
       [ view_parser/1, display/3 ]).
 
+:- meta_predicate display_section(3,+,-,-).
+
 :- pce_autoload(graph_viewer, graph_viewer).
 
 :- use_module(library(pce)).
@@ -19,6 +21,9 @@ view_parser(Parser) :-
 
 display(Parser, From, To) :-
     member(Kind, [display_lalr_states, display_rules]),
+    display_section(Kind, Parser, From, To).
+
+display_section(Kind, Parser, From, To) :-
     call(Kind, Parser, From, To).
 
 iterate(Table, Tables, ItemIndex, Entry, EntryIndex) :-
