@@ -15,7 +15,7 @@ grammar(expression, 'ParserTest.egt').
 grammar(gold, 'GOLD Meta-Language (2.6.0).egt').
 
 grammar_test_files(expression, ['ParserTest.txt']).
-grammar_test_files(gold, ['GOLD Meta-Language (2.6.0).grm']).
+%grammar_test_files(gold, ['GOLD Meta-Language (2.6.0).grm']).
 
 test_scan_and_parse(Program) :-
     test_files(scan_and_parse, Program).
@@ -40,8 +40,7 @@ view_graphs(Parser, _TestFile, _) :-
     view_parser:view_parser(Parser).
 
 scan_and_parse(Parser, TestFile, ProgramN) :-
-    shift_reduce_parser:reset(Parser, Program0),
-    lexer:scan_file(Program0, Tokens, TestFile),
+    lexer:scan_file(Parser, Tokens, TestFile),
     shift_reduce_parser:parse_tokens(Parser, Tokens, ProgramN).
 
 

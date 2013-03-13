@@ -1,10 +1,12 @@
 :- module(lexer, [
                   scan_file/3,
                   scan_stream/3,
-                  scan_list/3
+                  scan_list/3,
+                  init/2
                  ]).
 
 :- use_module(support).
+:- use_module(grammar,[]).
 :- use_module(table,  []).
 :- use_module(state,  []).
 :- use_module(dfa,    []).
@@ -17,10 +19,15 @@ scan_stream(Program, Tokens, Stream) :-
     stream_to_lazy_list(Stream, Input),
     scan_list(Program, Tokens, Input).
 
-scan_list(program(parser(G, T), State, _AST), Tokens, Input) :-
-    state:current(State, dfa-DfaIndex),
-    Initial = lexer(dfa-DfaIndex, last_accept-none, chars-''),
-    scan_list_(parser(G, T), Initial, Tokens, Input).
+init(parser(Grammar, _Tables),
+     lexer(dfa-DfaIndex, last_accept-none, chars-'')
+    ) :-
+    grammar:get_initial_states(Grammar, State),
+    state:current(State, dfa-DfaIndex).
+
+scan_list(Parser, Tokens, Input) :-
+    init(Parser, Initial),
+    scan_list_(Parser, Initial, Tokens, Input).
 
 scan_list_(parser(_G, Tables), _State, [Index-''], []) :-
     !,
