@@ -28,13 +28,13 @@ iterate(Table, Tables, ItemIndex, Entry, EntryIndex) :-
 %display_dfa_states(parser(_G, Tables, _S), From, To) :-
 %    iterate(dfa_table, Tables, DFAIndex, DFA, _).
 
-display_lalr_states(parser(_G, Tables, _S), From, To) :-
+display_lalr_states(parser(_G, Tables), From, To) :-
     iterate(lalr_table, Tables, LalrIndex, Action, _),
     item:get(action, Action, ActionType),
     action:type(ActionType, Name),
     display_lalr_action(Tables, LalrIndex, Name, Action, From, To).
 
-display_rules(parser(_G, Tables, _S), From, To) :-
+display_rules(parser(_G, Tables), From, To) :-
     table:items(rule_table, Tables, _RuleIndex, Rule),
     display_production(Tables, Rule, From, To).
 
