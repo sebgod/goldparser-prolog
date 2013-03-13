@@ -8,13 +8,12 @@
 
 :- multifile user:portray/1.
 
-user:message_hook(Term, Kind, ['~p'-Term, nl]) :-
-    format('t: ~p k: ~p', [Term, Kind]),
-    Term = parser_step(_, _, _, _,_).
+user:portray(lexer_step(_P0, Symbol-Data)) :-
+    format('~p-~p~n', [Symbol, Data]).
 
 user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
     %table:item(lalr_table, Tables, Target, Lalr),
-    format('~p\t~p\t~p~n', [Action, Value, Lalr]).
+    format('~p  \t~p\t~p~n', [Action, Value, Lalr]).
 
 user:portray(parser(Grammar, _Tables)) :-
     Grammar = grammar(header(Header), _Assoc),

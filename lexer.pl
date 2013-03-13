@@ -40,7 +40,7 @@ scan_list_(Parser, State, [ Token | TRest ], Input) :-
     scan_list_(Parser, State, TRest, InputR).
 
 debug_token_read(Parser, Token) :-
-    debug(lexer, '~p', parser_step(Parser, token, Token, _)).
+    debug(lexer, '~p', lexer_step(Parser, Token)).
 
 try_restore_input([], [], []).
 try_restore_input([Skipped | InputR], Skipped, InputR).
