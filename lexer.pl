@@ -29,14 +29,19 @@ scan_list(Parser, Tokens, Input) :-
     init(Parser, Initial),
     scan_list_(Parser, Initial, Tokens, Input).
 
-scan_list_(parser(_G, Tables), _State, [Index-''], []) :-
-    !,
-    once(symbol:by_type_name(Tables, eof, Index, _)).
+scan_list_(_, _, [], []) :- !.
 
-scan_list_(Parser, State, [ Token | TRest ], Input) :-
-    phrase(eat_token(Parser, State, Token), Input, InputR),
-    debug_token_read(Parser, Token),
-    scan_list_(Parser, State, TRest, InputR).
+scan_list_(Parser, Lexer, [ Token | TRest ], Input) :-
+    scan_input(Parser, Lexer, Token, Input, InputR),
+    scan_list_(Parser, Lexer, TRest, InputR).
+
+scan_input(Parser, Lexer, Token, Input, InputR) :-
+    phrase(read_token(Parser, Lexer, Token), Input, InputR),
+    !,
+    debug_token_read(Parser, Token).
+
+scan_input(parser(_G, Tables), _Lexer, Index-'') -->
+    { once(symbol:by_type_name(Tables, eof, Index, _)) }.
 
 debug_token_read(Parser, Token) :-
     debug(lexer, '~p', lexer_step(Parser, Token)).
@@ -44,7 +49,8 @@ debug_token_read(Parser, Token) :-
 try_restore_input([], [], []).
 try_restore_input([Skipped | InputR], Skipped, InputR).
 
-eat_token(parser(G, Tables),
+
+read_token(parser(G, Tables),
           lexer(dfa-DFAIndex, last_accept-LastAccept, chars-Chars0),
           Token) -->
     (   [Input],
@@ -60,7 +66,7 @@ eat_token(parser(G, Tables),
                            last_accept-Accept,
                            chars-Chars)
         },
-        eat_token(parser(G, Tables), NewState, Token)
+        read_token(parser(G, Tables), NewState, Token)
     ;   {
          (   LastAccept \= none
          ->  Token = LastAccept-Chars0
@@ -72,4 +78,8 @@ eat_token(parser(G, Tables),
          )
         }
     ).
+
+
+
+
 
