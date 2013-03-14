@@ -40,7 +40,7 @@ view_graphs(Parser, _TestFile, _) :-
     view_parser:view_parser(Parser).
 
 scan_and_parse(Parser, TestFile, ProgramN) :-
-    lexer:scan_file(Parser, Tokens, TestFile),
+    lexer:scan_file(Parser, TestFile, Tokens),
     shift_reduce_parser:parse_tokens(Parser, Tokens, ProgramN).
 
 
