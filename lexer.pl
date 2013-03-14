@@ -61,7 +61,7 @@ try_restore_input([], [], []).
 try_restore_input([Skipped | InputR], Skipped, InputR).
 
 
-read_token(parser(G, Tables),
+read_token(parser(Grammar, Tables),
           lexer(dfa-DFAIndex, last_accept-LastAccept, chars-Chars0),
           Token) -->
     (   [Input],
@@ -77,7 +77,7 @@ read_token(parser(G, Tables),
                            last_accept-Accept,
                            chars-Chars)
         },
-        read_token(parser(G, Tables), NewState, Token)
+        read_token(parser(Grammar, Tables), NewState, Token)
     ;   {
          (   LastAccept \= none
          ->  Token = LastAccept-Chars0
