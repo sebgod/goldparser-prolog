@@ -12,10 +12,10 @@
 :- meta_predicate test_files(3, ?).
 
 grammar(expression, 'ParserTest.egt').
-grammar(gold, 'GOLD Meta-Language (2.6.0).egt').
+%grammar(gold, 'GOLD Meta-Language (2.6.0).egt').
 
 grammar_test_files(expression, ['ParserTest.txt']).
-%grammar_test_files(gold, ['GOLD Meta-Language (2.6.0).grm']).
+grammar_test_files(gold, ['GOLD Meta-Language (2.6.0).grm']).
 
 test_scan_and_parse(Program) :-
     test_files(scan_and_parse, Program).
@@ -29,7 +29,7 @@ test_files(Tester, Program) :-
     load_parser(GrammarFile, Parser),
     grammar_test_files(GrammarName, TestFiles),
     member(TestFile, TestFiles),
-    format('\tTesting: ~w~n~n', [TestFile]),
+    format('\tTest: ~w~n~n', [TestFile]),
     call(Tester, Parser, TestFile, Program).
 
 load_parser(File, Parser) :-
@@ -41,9 +41,10 @@ view_graphs(Parser, _TestFile, _) :-
 
 scan_and_parse(Parser, TestFile, ProgramN) :-
     %lexer:scan_file(Parser, TestFile, Tokens),
-    shift_reduce_parser:parse_tokens(Parser,
-                                     lexer:scan_file_lazily(TestFile),
-                                     ProgramN).
+    lexer:init(Parser, Lexer),
+    lexer:scan_file_lazily(TestFile, Input),
+    LazyLexer = lazy(Lexer, Input, lexer:read_token),
+    shift_reduce_parser:parse_tokens(Parser, LazyLexer, ProgramN).
 
 
 
