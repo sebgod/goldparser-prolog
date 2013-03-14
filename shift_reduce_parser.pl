@@ -1,4 +1,4 @@
-:- module(shift_reduce_parser, [parser/2, parse_tokens/3, parse_token/4]).
+:- module(shift_reduce_parser, [parser/2, init/2, parse_tokens/3]).
 
 :- use_module(grammar, []).
 :- use_module(state,   []).
@@ -20,10 +20,10 @@ parser(Grammar, parser(Grammar, Tables)) :-
 % Bottom-up shift-reduce parser.
 %
 parse_tokens(Parser, Tokens, ProgramN) :-
-    reset(Parser, Program0),
+    init(Parser, Program0),
     phrase(parse_tokens(Program0, ProgramN), Tokens, []).
 
-reset(Parser, program(Parser, StateN, ASTN)) :-
+init(Parser, program(Parser, StateN, ASTN)) :-
     Parser = parser(Grammar, _Tables),
     grammar:get_initial_states(Grammar, State0),
     state:current(State0, lalr-Lalr),
@@ -63,10 +63,10 @@ parse_token(P0, PN) -->
     !.
 
 parse_token(_P0, _P1, Tokens, Tokens) :-
-    [SymbolType-Data | _] = Tokens,
-    symbol:type(SymbolType, SymbolTypeName),
+    [SymbolIndex-Data | _] = Tokens,
+    %symbol:type(SymbolType, SymbolTypeName),
     throw(error(representation_error('unexpected token'),
-                context(parse_token//2, SymbolTypeName-Data))).
+                context(parse_token//2, SymbolIndex-Data))).
 
 next_action(program(Parser, _State, AST),
             ActionName, Target,

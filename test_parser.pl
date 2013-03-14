@@ -3,9 +3,11 @@
                         test_view/0
                        ]).
 
+:- use_module(support).
 :- use_module(portray_grammar, []).
 :- use_module(egt, []).
 :- use_module(lexer, []).
+:- use_module(state, []).
 :- use_module(shift_reduce_parser, []).
 :- use_module(view_parser, []).
 
@@ -40,15 +42,36 @@ view_graphs(Parser, _TestFile, _) :-
     view_parser:view_parser(Parser).
 
 scan_and_parse(Parser, TestFile, ProgramN) :-
-    %lexer:scan_file(Parser, TestFile, Tokens),
     lexer:init(Parser, Lexer),
-    lexer:scan_file_lazily(TestFile, Input),
-    LazyLexer = lazy(Lexer, Input, lexer:read_token),
-    shift_reduce_parser:parse_tokens(Parser, LazyLexer, ProgramN).
+    shift_reduce_parser:init(Parser, Program0),
+    safe_open_file(TestFile,
+                   scan_and_parse_stream(Program0, Lexer, ProgramN),
+                   [encoding(utf8)]).
 
+scan_and_parse_stream(Program0, Lexer, ProgramN, Stream) :-
+    stream_to_lazy_list(Stream, Input),
+    phrase(scan_and_parse_dcg(Program0, Lexer, ProgramN),
+           Input, []).
 
+scan_and_parse_dcg(Program, _, Program) -->
+    [],
+    {
+     Program = program(_, State, _),
+     state:current(State, accept-true),
+     !
+    }.
 
+scan_and_parse_dcg(Program0, Lexer, ProgramN) -->
+    { Program0 = program(Parser, _, _) },
+    lexer:scan_input(Parser, Lexer, Token),
+    !,
+    { %Tokens = [Token | TokenR0],
+      phrase(shift_reduce_parser:parse_tokens(Program0, Program1),
+             [Token], [])
+    },
+    scan_and_parse_dcg(Program1, Lexer, ProgramN).
 
+%scan_and_parse_dcg(Program, _, Program, [], []) :- !.
 
 
 
