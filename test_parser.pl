@@ -57,7 +57,7 @@ scan_and_parse_dcg(Program, _, Program) -->
     [],
     {
      Program = program(_, State, _),
-     state:current(State, accept-true),
+     \+ state:current(State, accept-none),
      !
     }.
 

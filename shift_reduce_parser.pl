@@ -29,7 +29,7 @@ init(Parser, program(Parser, StateN, ASTN)) :-
     state:current(State0, lalr-Lalr),
     stack:empty(AST0),
     stack:push(AST0, s(Lalr, start-''), ASTN),
-    state:merge(State0, [accept-false], StateN).
+    state:merge(State0, [accept-none], StateN).
 
 :- if(current_prolog_flag(debug, true)).
 %% debug_parser_step(+P0, +PN, +ActionName, +Target) is det.
