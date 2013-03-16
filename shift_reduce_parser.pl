@@ -37,7 +37,8 @@ debug_parser_step(
     program(P0, _State0, AST0),
     program(P1, _StateN, AST1), ActionName, Target) :-
     (   ActionName == skip
-    ->  Topic = parser(detail)
+    ->  Target = LalrN, % skipping does not change the lalr state
+        Topic = parser(detail)
     ;   Topic = parser
     ),
     lalr:index(AST0, Lalr0),
