@@ -2,14 +2,14 @@
 
 empty([]).
 
-push(Stack, Terminal, [Terminal | Stack]).
+push(Stack, Symbol, [Symbol | Stack]).
 
 peek([Top | _], Top).
 
 pop([Top | StackR], Top, StackR).
 
-rpop(Stack, Size, Items, StackR) :-
+rpop(Stack, Size, Symbols, StackR) :-
     length(ReversedList, Size),
     append(ReversedList, StackR, Stack),
-    reverse(ReversedList, Items).
+    reverse(ReversedList, Symbols).
 
