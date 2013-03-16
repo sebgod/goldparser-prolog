@@ -62,10 +62,8 @@ scan_and_parse_dcg(Program, _, Program) -->
     }.
 
 scan_and_parse_dcg(Program0, Lexer, ProgramN) -->
-    { Program0 = program(Parser, _, _) },
-    lexer:scan_input(Parser, Lexer, Token),
-    !,
-    { %Tokens = [Token | TokenR0],
+    lexer:scan_input(Lexer, Token),
+    {
       phrase(shift_reduce_parser:parse_tokens(Program0, Program1),
              [Token], [])
     },
