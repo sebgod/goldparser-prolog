@@ -10,8 +10,6 @@
 :- use_module(stack,   []).
 :- use_module(table,   []).
 
-:- debug, debug(parser), debug(parser(detail)).
-
 parser(Grammar, parser(Grammar, Tables)) :-
     grammar:tables(Grammar, Tables).
 

@@ -1,5 +1,6 @@
 :- module(support, [
                     list_trim/4,
+                    list_skip/3,
                     char_and_code/3,
                     assoc_append_list/4,
                     safe_open_file/2,
@@ -23,6 +24,13 @@ list_trim(Source, Target, Trimmed, Rest) :-
     length(Source, Length),
     length(Trimmed, Length),
     append(Trimmed, Rest, Target).
+
+list_skip(Skip, [_ | Rest0], RestN) :-
+    Skip > 0,
+    SkipN is Skip - 1,
+    list_skip(SkipN, Rest0, RestN).
+
+list_skip(0, List, List).
 
 char_and_code(Input, Char, Code) :-
     atom(Input),

@@ -6,8 +6,6 @@
                   init/2
                  ]).
 
-:- debug(lexer).
-
 :- use_module(support).
 :- use_module(grammar,[]).
 :- use_module(table,  []).
@@ -23,8 +21,7 @@ scan_stream(Program, Tokens, Stream) :-
     scan_list(Program, Tokens, Input).
 
 init(parser(Grammar, Tables),
-     lexer(chars-'', dfa-DfaIndex, group_marker-_GroupChars,
-           last_accept-none, tables-Tables)
+     lexer(chars-'', dfa-DfaIndex, last_accept-none, tables-Tables)
     ) :-
     grammar:initial_states(Grammar, State),
     state:current(State, dfa-DfaIndex).
@@ -44,28 +41,40 @@ scan_input(Lexer, Token) -->
     scan_input(Lexer, Token, Group0, _GroupN).
 
 scan_input(Lexer, TokenN, Groups0, GroupsN) -->
-    read_token(Lexer, Token0),
+    lookahead(Lexer, Token0),
     analyze_lexical_group(Lexer, Token0, TokenN, Groups0, GroupsN),
     { debug_token_read(Lexer, TokenN) }.
 
 analyze_lexical_group(_Lexer, Token, Token, Groups0, GroupsN) -->
     {
-     stack:push(Groups0, g(Token), GroupsN)
-    },
-    !.
+     Token = _Index-group_start(_),
+     stack:push(Groups0, group(Token), GroupsN)
+    }.
 
 analyze_lexical_group(_Lexer,
                       Token, Token,
-                      Groups, Groups,
-                      Input, Input).
+                      Groups, Groups) -->
+    { stack:empty(Groups),
+      Token = _SymbolIndex-Data,
+      (   Data == eof
+      ->  Length = 0
+      ;   arg(1, Data, TokenChars),
+          atom_length(TokenChars, Length)
+      )
+    },
+    list_skip(Length).
 
+:- if(current_prolog_flag(debug, true)).
 debug_token_read(Lexer, Token) :-
     debug(lexer, '~p', lexer_step(Lexer, Token)).
+:- else.
+debug_token_read(_, _).
+:-endif.
 
-try_restore_input([], [], []).
-try_restore_input([Skipped | InputR], Skipped, InputR).
+lookahead(Lexer, Token, InputChars, InputChars) :-
+    read_token(Lexer, Token, InputChars, _).
 
-read_token(lexer(chars-Chars0, dfa-DFAIndex, group_marker-GroupMarker,
+read_token(lexer(chars-Chars0, dfa-DFAIndex,
                  last_accept-LastAccept, tables-Tables),
            Token) -->
     (   [Input],
@@ -79,7 +88,7 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex, group_marker-GroupMarker,
          dfa:accept(TargetDFA, Accept),
          atom_concat(Chars0, Char, CharsN),
          NewState = lexer(chars-CharsN, dfa-TargetIndex,
-                          group_marker-GroupMarker, last_accept-Accept,
+                          last_accept-Accept,
                           tables-Tables)
         },
         read_token(NewState, Token)
@@ -90,10 +99,7 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex, group_marker-GroupMarker,
              Token = LastAccept-Data
          ;   (   ground(Input)
              ->  symbol:by_type_name(Tables, error, Index, _),
-                 try_restore_input(Input, FailedInput, InputR),
-                 Input = [FailedInput | InputR],
-                 format(atom(Error), '~w', [FailedInput]),
-                 Token = Index-error(Error)
+                 Token = Index-error(Input)
              ;   symbol:by_type_name(Tables, eof, Index, _),
                  Token = Index-eof
              )
