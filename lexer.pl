@@ -49,10 +49,10 @@ scan_input(Lexer, TokenN, Groups0, GroupsN) -->
     { debug_token_read(Lexer, TokenN) }.
 
 analyze_lexical_group(_Lexer, Token, Token, Groups0, GroupsN) -->
-    !,
     {
      stack:push(Groups0, g(Token), GroupsN)
-    }.
+    },
+    !.
 
 analyze_lexical_group(_Lexer,
                       Token, Token,

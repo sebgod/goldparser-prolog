@@ -57,9 +57,9 @@ scan_and_parse_dcg(Program, _, Program) -->
     [],
     {
      Program = program(_, state(accept-Accept), _),
-     Accept \= none,
-     !
-    }.
+     Accept \= none
+    },
+    !.
 
 scan_and_parse_dcg(Program0, Lexer, ProgramN) -->
     lexer:scan_input(Lexer, Token),
