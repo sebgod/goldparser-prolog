@@ -6,6 +6,8 @@
                   init/2
                  ]).
 
+:- debug(lexer).
+
 :- use_module(support).
 :- use_module(grammar,[]).
 :- use_module(table,  []).
