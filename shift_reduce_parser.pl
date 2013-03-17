@@ -10,7 +10,7 @@
 :- use_module(stack,   []).
 :- use_module(table,   []).
 
-:- debug, debug(parser).
+:- debug, debug(parser), debug(parser(detail)).
 
 parser(Grammar, parser(Grammar, Tables)) :-
     grammar:tables(Grammar, Tables).
@@ -93,15 +93,15 @@ symbol_to_action(SymbolType, SymbolIndex, Actions, ActionName, Target) :-
     action:type(ActionType, ActionName),
     item:get(target, FoundAction, Target).
 
-perform(skip, _Target, P, P, [_Skipped | TokenR], TokenR).
+perform(skip, _Target, P, P) --> [_Skipped].
 
 perform(shift, Target,
         program(Tables, State, AST0),
-        program(Tables, State, ASTN),
-        [Token | TokenR], TokenR
-       ) :-
+        program(Tables, State, ASTN)
+       ) -->
+    [Token],
     !,
-    stack:push(AST0, s(Target, Token), ASTN).
+    { stack:push(AST0, s(Target, Token), ASTN) }.
 
 perform(reduce, Target,
         program(Tables, State, AST0),
