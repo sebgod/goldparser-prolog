@@ -29,7 +29,7 @@ init(Parser, program(Parser, StateN, ASTN)) :-
     state:current(State0, lalr-Lalr),
     stack:empty(AST0),
     stack:push(AST0, s(Lalr, start-''), ASTN),
-    state:merge(State0, [accept-none], StateN).
+    StateN = state(accept-none).
 
 :- if(current_prolog_flag(debug, true)).
 %% debug_parser_step(+P0, +PN, +ActionName, +Target) is det.
@@ -133,8 +133,8 @@ perform(reduce, Target,
     update_reduction_state(Tables, HeadIndex-Reduction,  AST1, ASTN).
 
 perform(accept, _Target,
-        program(parser(Grammar, Tables), State0, AST0),
-        program(parser(Grammar, Tables), StateN, ASTN),
+        program(parser(Grammar, Tables), state(accept-_), AST0),
+        program(parser(Grammar, Tables), state(accept-Accept), ASTN),
         Tokens, TokensR) :-
     (   [SymbolIndex-_ | TokensR] = Tokens,
         symbol:by_type_name(Tables, eof, SymbolIndex, _),
@@ -145,8 +145,7 @@ perform(accept, _Target,
     ->  Accept = true
     ;   Accept = false,
         ASTN = AST0
-    ),
-    state:merge(State0, [accept-Accept], StateN).
+    ).
 
 update_reduction_state(Tables, HeadIndex-Reduction, AST0, ASTN) :-
     lalr:get(Tables, AST0, LalrPrev),

@@ -56,8 +56,8 @@ scan_and_parse_stream(Program0, Lexer, ProgramN, Stream) :-
 scan_and_parse_dcg(Program, _, Program) -->
     [],
     {
-     Program = program(_, State, _),
-     \+ state:current(State, accept-none),
+     Program = program(_, state(accept-Accept), _),
+     Accept \= none,
      !
     }.
 
