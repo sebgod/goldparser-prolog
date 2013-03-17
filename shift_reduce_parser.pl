@@ -74,26 +74,19 @@ next_action(program(Tables, _State, AST),
            ) :-
     lalr:get(Tables, AST, Lalr),
     item:get_entries(Lalr, Actions),
-    lookahead(Tokens, SymbolIndex),
-    symbol_to_action(Tables, SymbolIndex, Actions,
-                     ActionName, Target).
-
-symbol_to_action(Tables, SymbolIndex, Actions, ActionName, Target) :-
-    symbol:by_type_name(Tables, SymbolTypeName, SymbolIndex, _Symbol),
-    symbol_type_to_action(SymbolTypeName-SymbolIndex,
+    lookahead(Tokens, SymbolTypeName, SymbolIndex),
+    symbol_to_action(SymbolTypeName, SymbolIndex,
                           Actions, ActionName, Target).
 
-lookahead(Tokens, SymbolIndex) :-
-    [SymbolIndex-_Data | _] = Tokens.
+lookahead(Tokens, SymbolTypeName, SymbolIndex) :-
+    [SymbolIndex-Data | _] = Tokens,
+    functor(Data, SymbolTypeName, _).
 
-symbol_type_to_action(noise-_SymbolIndex,
-                      _Actions, skip, _Target) :- !.
+symbol_to_action(noise, _SymbolIndex, _Actions, skip, _Target) :- !.
 
-symbol_type_to_action(accept-_SymbolIndex,
-                      _Actions, accept, _Target) :- !.
+symbol_to_action(accept, _SymbolIndex, _Actions, accept, _Target) :- !.
 
-symbol_type_to_action(SymbolType-SymbolIndex,
-                      Actions, ActionName, Target) :-
+symbol_to_action(SymbolType, SymbolIndex, Actions, ActionName, Target) :-
     memberchk(SymbolType, [terminal, eof, nonterminal]),
     action:find(Actions, SymbolIndex, FoundAction),
     item:get(action, FoundAction, ActionType),
@@ -132,8 +125,7 @@ perform(accept, _Target,
         program(Tables, state(accept-none), AST0),
         program(Tables, state(accept-Accept), ASTN),
         Tokens, TokensR) :-
-    (   [SymbolIndex-_ | TokensR] = Tokens,
-        symbol:by_type_name(Tables, eof, SymbolIndex, _),
+    (   [_-eof | TokensR] = Tokens,
         stack:pop(AST0, Reduction, AST1),
         stack:pop(AST1, s(InitLalr, start-_), AST2),
         stack:push(AST2, s(InitLalr, Reduction), ASTN),
@@ -146,7 +138,7 @@ perform(accept, _Target,
 update_reduction_state(Tables, HeadIndex-Reduction, AST0, ASTN) :-
     lalr:get(Tables, AST0, LalrPrev),
     item:get_entries(LalrPrev, Actions),
-    symbol_to_action(Tables, HeadIndex, Actions, goto, Goto),
+    symbol_to_action(nonterminal, HeadIndex, Actions, goto, Goto),
     stack:push(AST0, s(Goto, HeadIndex-Reduction), ASTN).
 
 

@@ -73,25 +73,28 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex, group_marker-GroupMarker,
          char_and_code(Input, Char, Code),
          dfa:find_edge(Tables, DFA, Code, TargetIndex)
         }
-    ->  { table:item(dfa_table, Tables, TargetIndex, TargetDFA),
-          dfa:accept(TargetDFA, Accept),
-          atom_concat(Chars0, Char, Chars),
-          NewState = lexer(chars-Chars, dfa-TargetIndex,
-                           group_marker-GroupMarker, last_accept-Accept,
-                           tables-Tables)
+    ->  {
+         table:item(dfa_table, Tables, TargetIndex, TargetDFA),
+         dfa:accept(TargetDFA, Accept),
+         atom_concat(Chars0, Char, CharsN),
+         NewState = lexer(chars-CharsN, dfa-TargetIndex,
+                          group_marker-GroupMarker, last_accept-Accept,
+                          tables-Tables)
         },
         read_token(NewState, Token)
     ;   {
          (   LastAccept \= none
-         ->  Token = LastAccept-Chars0
+         ->  symbol:by_type_name(Tables, Type, LastAccept, _Symbol),
+             Data =.. [Type, Chars0],
+             Token = LastAccept-Data
          ;   (   ground(Input)
              ->  once(symbol:by_type_name(Tables, error, Index, _)),
                  try_restore_input(Input, FailedInput, InputR),
                  Input = [FailedInput | InputR],
                  format(atom(Error), '~w', [FailedInput]),
-                 Token = Index-Error
+                 Token = Index-error(Error)
              ;   once(symbol:by_type_name(Tables, eof, Index, _)),
-                 Token = Index-''
+                 Token = Index-eof
              )
          )
         }
