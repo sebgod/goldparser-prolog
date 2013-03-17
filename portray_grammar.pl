@@ -15,7 +15,7 @@ user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
     %table:item(lalr_table, Tables, Target, Lalr),
     format('~p  \t~p\t~p~n', [Action, Value, Lalr]).
 
-user:portray(parser(Grammar, _Tables)) :-
+user:portray(Grammar) :-
     Grammar = grammar(header(Header), _Assoc),
     grammar:get_properties(Grammar, Props),
     forall(member(Property, Props),
@@ -25,6 +25,11 @@ user:portray(parser(Grammar, _Tables)) :-
           )
           ),
     format(' version: ~w', [Header]).
+
+user:portray(Tables) :-
+    get_assoc(rule_table, Tables, _),
+    get_assoc(symbol_table, Tables, _),
+    write('_Tables').
 
 user:portray(Assoc) :-
     assoc_to_list(Assoc, List),

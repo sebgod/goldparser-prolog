@@ -23,13 +23,12 @@ parse_tokens(Parser, Tokens, ProgramN) :-
     init(Parser, Program0),
     phrase(parse_tokens(Program0, ProgramN), Tokens, []).
 
-init(Parser, program(Parser, StateN, ASTN)) :-
-    Parser = parser(Grammar, _Tables),
-    grammar:get_initial_states(Grammar, State0),
-    state:current(State0, lalr-Lalr),
+init(Parser, program(Tables, state(accept-none), ASTN)) :-
+    Parser = parser(Grammar, Tables),
+    grammar:get_initial_states(Grammar, InitialState),
+    state:current(InitialState, lalr-Lalr),
     stack:empty(AST0),
-    stack:push(AST0, s(Lalr, start-''), ASTN),
-    StateN = state(accept-none).
+    stack:push(AST0, s(Lalr, start-''), ASTN).
 
 :- if(current_prolog_flag(debug, true)).
 %% debug_parser_step(+P0, +PN, +ActionName, +Target) is det.
@@ -69,11 +68,10 @@ parse_token(_P0, _P1, Tokens, Tokens) :-
     throw(error(representation_error('unexpected token'),
                 context(parse_token//2, SymbolIndex-Data))).
 
-next_action(program(Parser, _State, AST),
+next_action(program(Tables, _State, AST),
             ActionName, Target,
             Tokens, Tokens
            ) :-
-    Parser = parser(_Grammar, Tables),
     lalr:get(Tables, AST, Lalr),
     item:get_entries(Lalr, Actions),
     lookahead(Tokens, SymbolIndex),
@@ -105,20 +103,18 @@ symbol_type_to_action(SymbolType-SymbolIndex,
 perform(skip, _Target, P, P, [_Skipped | TokenR], TokenR).
 
 perform(shift, Target,
-        program(parser(Grammar, Tables), State, AST0),
-        program(parser(Grammar, Tables), State, ASTN),
+        program(Tables, State, AST0),
+        program(Tables, State, ASTN),
         [Token | TokenR], TokenR
        ) :-
     !,
     stack:push(AST0, s(Target, Token), ASTN).
 
 perform(reduce, Target,
-        program(Parser, State, AST0),
-        program(Parser, State, ASTN),
+        program(Tables, State, AST0),
+        program(Tables, State, ASTN),
         Tokens, Tokens
        ) :-
-    Parser = parser(_, Tables),
-
     table:item(rule_table, Tables, Target, Rule),
     item:get(head_index, Rule, HeadIndex),
     symbol:by_type_name(Tables, nonterminal, HeadIndex, Head),
@@ -133,8 +129,8 @@ perform(reduce, Target,
     update_reduction_state(Tables, HeadIndex-Reduction,  AST1, ASTN).
 
 perform(accept, _Target,
-        program(parser(Grammar, Tables), state(accept-_), AST0),
-        program(parser(Grammar, Tables), state(accept-Accept), ASTN),
+        program(Tables, state(accept-none), AST0),
+        program(Tables, state(accept-Accept), ASTN),
         Tokens, TokensR) :-
     (   [SymbolIndex-_ | TokensR] = Tokens,
         symbol:by_type_name(Tables, eof, SymbolIndex, _),
