@@ -54,7 +54,7 @@ analyze_lexical_group(_Lexer, Token, Token, Groups0, GroupsN) -->
 analyze_lexical_group(_Lexer,
                       Token, Token,
                       Groups, Groups) -->
-    { stack:empty(Groups),
+    { stack:empty(Groups),  % no group there, eat the token
       Token = _SymbolIndex-Data,
       (   Data == eof
       ->  Length = 0
@@ -64,12 +64,6 @@ analyze_lexical_group(_Lexer,
     },
     list_skip(Length).
 
-:- if(current_prolog_flag(debug, true)).
-debug_token_read(Lexer, Token) :-
-    debug(lexer, '~p', lexer_step(Lexer, Token)).
-:- else.
-debug_token_read(_, _).
-:-endif.
 
 lookahead(Lexer, Token, InputChars, InputChars) :-
     read_token(Lexer, Token, InputChars, _).
@@ -88,8 +82,7 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
          dfa:accept(TargetDFA, Accept),
          atom_concat(Chars0, Char, CharsN),
          NewState = lexer(chars-CharsN, dfa-TargetIndex,
-                          last_accept-Accept,
-                          tables-Tables)
+                          last_accept-Accept, tables-Tables)
         },
         read_token(NewState, Token)
     ;   {
@@ -106,3 +99,10 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
          )
         }
     ).
+
+:- if(current_prolog_flag(debug, true)).
+debug_token_read(Lexer, Token) :-
+    debug(lexer, '~p', lexer_step(Lexer, Token)).
+:- else.
+debug_token_read(_, _).
+:-endif.
