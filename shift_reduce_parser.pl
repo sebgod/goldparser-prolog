@@ -82,12 +82,13 @@ lookahead(Tokens, SymbolTypeName, SymbolIndex) :-
     [SymbolIndex-Data | _] = Tokens,
     functor(Data, SymbolTypeName, _).
 
-symbol_to_action(noise, _SymbolIndex, _Actions, skip, _Target) :- !.
+symbol_to_action(noise, _SymbolIndex, _Actions, skip, _Target).
 
-symbol_to_action(accept, _SymbolIndex, _Actions, accept, _Target) :- !.
+symbol_to_action(accept, _SymbolIndex, _Actions, accept, _Target).
 
-symbol_to_action(SymbolType, SymbolIndex, Actions, ActionName, Target) :-
-    memberchk(SymbolType, [terminal, eof, nonterminal]),
+symbol_to_action(SymbolTypeName, SymbolIndex,
+                 Actions, ActionName, Target) :-
+    memberchk(SymbolTypeName, [terminal, eof, nonterminal]),
     action:find(Actions, SymbolIndex, FoundAction),
     item:get(action, FoundAction, ActionType),
     action:type(ActionType, ActionName),
@@ -100,7 +101,6 @@ perform(shift, Target,
         program(Tables, State, ASTN)
        ) -->
     [Token],
-    !,
     { stack:push(AST0, s(Target, Token), ASTN) }.
 
 perform(reduce, Target,

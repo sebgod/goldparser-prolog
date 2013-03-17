@@ -49,6 +49,7 @@ scan_input(Lexer, TokenN, Groups0, GroupsN) -->
     { debug_token_read(Lexer, TokenN) }.
 
 analyze_lexical_group(_Lexer, Token, Token, Groups0, GroupsN) -->
+    !,
     {
      stack:push(Groups0, g(Token), GroupsN)
     }.
@@ -88,12 +89,12 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex, group_marker-GroupMarker,
              Data =.. [Type, Chars0],
              Token = LastAccept-Data
          ;   (   ground(Input)
-             ->  once(symbol:by_type_name(Tables, error, Index, _)),
+             ->  symbol:by_type_name(Tables, error, Index, _),
                  try_restore_input(Input, FailedInput, InputR),
                  Input = [FailedInput | InputR],
                  format(atom(Error), '~w', [FailedInput]),
                  Token = Index-error(Error)
-             ;   once(symbol:by_type_name(Tables, eof, Index, _)),
+             ;   symbol:by_type_name(Tables, eof, Index, _),
                  Token = Index-eof
              )
          )
