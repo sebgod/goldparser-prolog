@@ -102,7 +102,7 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
 
 :- if(current_prolog_flag(debug, true)).
 debug_token_read(Lexer, Token) :-
-    debug(lexer, '~p', lexer_step(Lexer, Token)).
+    debug(lexer, '~p', lexer_step('token read', Lexer, Token)).
 :- else.
 debug_token_read(_, _).
 :-endif.

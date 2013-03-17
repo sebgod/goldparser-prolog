@@ -2,7 +2,7 @@
                         test_scan_and_parse/1,
                         test_view/0
                        ]).
-:- debug, debug(lexer), debug(parser), debug(parser(detail)).
+:- debug(lexer), debug(parser), debug(parser(detail)).
 
 :- use_module(support).
 :- use_module(portray_grammar, []).

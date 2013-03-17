@@ -8,8 +8,8 @@
 
 :- multifile user:portray/1.
 
-user:portray(lexer_step(_P0, Symbol-Data)) :-
-    format('read token\t~p-~p~n', [Symbol, Data]).
+user:portray(lexer_step(LexerType, _P0, Symbol-Data)) :-
+    format('~p\t~p-~p~n', [LexerType, Symbol, Data]).
 
 user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
     %table:item(lalr_table, Tables, Target, Lalr),
