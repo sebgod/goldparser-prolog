@@ -21,8 +21,8 @@ scan_stream(Program, Tokens, Stream) :-
     scan_list(Program, Tokens, Input).
 
 init(parser(Grammar, Tables),
-     lexer(tables-Tables, dfa-DfaIndex, last_accept-none, chars-'',
-           group_marker-_GroupChars)
+     lexer(chars-'', dfa-DfaIndex, group_marker-_GroupChars,
+           last_accept-none, tables-Tables)
     ) :-
     grammar:get_initial_states(Grammar, State),
     state:current(State, dfa-DfaIndex).
@@ -62,8 +62,8 @@ debug_token_read(Lexer, Token) :-
 try_restore_input([], [], []).
 try_restore_input([Skipped | InputR], Skipped, InputR).
 
-read_token(lexer(tables-Tables, dfa-DFAIndex, last_accept-LastAccept,
-                 chars-Chars0, group_marker-GroupMarker),
+read_token(lexer(chars-Chars0, dfa-DFAIndex, group_marker-GroupMarker,
+                 last_accept-LastAccept, tables-Tables),
            Token) -->
     (   [Input],
         {
@@ -74,9 +74,9 @@ read_token(lexer(tables-Tables, dfa-DFAIndex, last_accept-LastAccept,
     ->  { table:item(dfa_table, Tables, TargetIndex, TargetDFA),
           dfa:accept(TargetDFA, Accept),
           atom_concat(Chars0, Char, Chars),
-          NewState = lexer(tables-Tables, dfa-TargetIndex,
-                           last_accept-Accept,
-                           chars-Chars, group_marker-GroupMarker)
+          NewState = lexer(chars-Chars, dfa-TargetIndex,
+                           group_marker-GroupMarker, last_accept-Accept,
+                           tables-Tables)
         },
         read_token(NewState, Token)
     ;   {
