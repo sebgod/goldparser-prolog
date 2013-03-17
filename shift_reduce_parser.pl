@@ -13,7 +13,7 @@
 :- debug, debug(parser).
 
 parser(Grammar, parser(Grammar, Tables)) :-
-    grammar:create_tables(Grammar, Tables).
+    grammar:tables(Grammar, Tables).
 
 %% parse(+Parser, +Tokens, ?Result) is det.
 %
@@ -25,7 +25,7 @@ parse_tokens(Parser, Tokens, ProgramN) :-
 
 init(Parser, program(Tables, state(accept-none), ASTN)) :-
     Parser = parser(Grammar, Tables),
-    grammar:get_initial_states(Grammar, InitialState),
+    grammar:initial_states(Grammar, InitialState),
     state:current(InitialState, lalr-Lalr),
     stack:empty(AST0),
     stack:push(AST0, s(Lalr, start-''), ASTN).

@@ -26,7 +26,7 @@ init(parser(Grammar, Tables),
      lexer(chars-'', dfa-DfaIndex, group_marker-_GroupChars,
            last_accept-none, tables-Tables)
     ) :-
-    grammar:get_initial_states(Grammar, State),
+    grammar:initial_states(Grammar, State),
     state:current(State, dfa-DfaIndex).
 
 scan_list(Parser, Tokens, Input) :-

@@ -17,7 +17,7 @@ user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
 
 user:portray(Grammar) :-
     Grammar = grammar(header(Header), _Assoc),
-    grammar:get_properties(Grammar, Props),
+    grammar:properties(Grammar, Props),
     forall(member(Property, Props),
           (   item:get(name, Property, Name),
               item:get(value, Property, Value),
