@@ -94,7 +94,7 @@ display_symbol(Atom, Tables, Index) :-
 display_symbol(Atom, _Tables, Symbol) :-
     item:get(name, Symbol, Name),
     item:get(kind, Symbol, Kind),
-    symbol:type(Kind, KindName),
+    symbol:type(Kind, KindName, _),
     display_symbol_format(KindName, Format),
     format(atom(Atom), Format, [Name]).
 

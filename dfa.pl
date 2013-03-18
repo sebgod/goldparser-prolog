@@ -1,6 +1,5 @@
 :- module(dfa,
           [
-           current/3,
            accept/2,
            find_edge/4
           ]).
@@ -9,9 +8,6 @@
 :- use_module(table, []).
 :- use_module(state, []).
 :- use_module(charset, []).
-
-current(Tables, Index, DFA) :-
-    table:item(dfa_table, Tables, Index, DFA).
 
 accept(DFA, Accept) :-
     (    item:get(accept_state, DFA, true)

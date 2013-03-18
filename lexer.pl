@@ -10,6 +10,7 @@
 :- use_module(grammar,[]).
 :- use_module(table,  []).
 :- use_module(state,  []).
+:- use_module(group,  []).
 :- use_module(dfa,    []).
 :- use_module(symbol, []).
 
@@ -45,17 +46,34 @@ scan_input(Lexer, TokenN, Groups0, GroupsN) -->
     analyze_lexical_group(Lexer, Token0, TokenN, Groups0, GroupsN),
     { debug_token_read(Lexer, TokenN) }.
 
-analyze_lexical_group(_Lexer, Token, Token, Groups0, GroupsN) -->
+% analyze_lexical_group(+, +, -, +, -) is det.
+analyze_lexical_group(Lexer, Lookahead, Token,
+                      Groups0, GroupsN) -->
     {
-     Token = _Index-group_start(_),
-     stack:push(Groups0, group(Token), GroupsN)
-    }.
+     Lookahead = SymbolIndex-group_start(GroupStart),
+     !,
+     Lexer = lexer(chars-_, dfa-_, last_accept-_, tables-Tables),
+     group:by_symbol(Tables, start_index-SymbolIndex,
+                     _GroupIndex, Group),
+     item:get(container_index, Group, ContainerIndex),
+     symbol:token(Tables, ContainerIndex, GroupStart, Token),
+     debug(lexer, '~p', g(Group, Token) ),
+     (   (   stack:empty(Groups)
+         ;   stack:peek(Groups, _Top)
+         )
+     ->  stack:push(Groups0, group(Token), GroupsN)
+     )
+    },
+    advance(Lookahead).
 
 analyze_lexical_group(_Lexer,
                       Token, Token,
                       Groups, Groups) -->
-    { stack:empty(Groups),  % no group there, eat the token
-      Token = _SymbolIndex-Data,
+    { stack:empty(Groups) },  % no group there, eat the token
+    advance(Token).
+
+advance(Token) -->
+    { Token = _SymbolIndex-Data,
       (   Data == eof
       ->  Length = 0
       ;   arg(1, Data, TokenChars),
@@ -63,7 +81,6 @@ analyze_lexical_group(_Lexer,
       )
     },
     list_skip(Length).
-
 
 lookahead(Lexer, Token, InputChars, InputChars) :-
     read_token(Lexer, Token, InputChars, _).
@@ -73,7 +90,7 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
            Token) -->
     (   [Input],
         {
-         dfa:current(Tables, DFAIndex, DFA),
+         table:item(dfa_table, Tables, DFAIndex, DFA),
          char_and_code(Input, Char, Code),
          dfa:find_edge(Tables, DFA, Code, TargetIndex)
         }
@@ -87,9 +104,7 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
         read_token(NewState, Token)
     ;   {
          (   LastAccept \= none
-         ->  symbol:by_type_name(Tables, Type, LastAccept, _Symbol),
-             Data =.. [Type, Chars0],
-             Token = LastAccept-Data
+         ->  symbol:token(Tables, LastAccept, Chars0, Token)
          ;   (   ground(Input)
              ->  symbol:by_type_name(Tables, error, Index, _),
                  Token = Index-error(Input)
