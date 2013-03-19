@@ -1,7 +1,6 @@
 :- module(symbol,
           [
            type/3,
-           by_type_id/4,
            by_type_name/4,
            token/4
         ]).
@@ -52,13 +51,9 @@ type(6, decremented, 0).
 type(7, error, 1).
 
 by_type_name(Tables, KindName, SymbolIndex, Symbol) :-
-    by_type_id(Tables, KindId, SymbolIndex, Symbol),
-    type(KindId, KindName, _).
-
-by_type_id(Tables, KindId, SymbolIndex, Symbol) :-
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
     item:get(kind, Symbol, KindId),
-    type(KindId, _, _).
+    type(KindId, KindName, _).
 
 token(Tables, SymbolIndex, Data, SymbolIndex-Token) :-
     by_type_name(Tables, KindName, SymbolIndex, _),
