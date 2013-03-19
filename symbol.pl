@@ -50,10 +50,19 @@ type(5, ground_end, 1).
 type(6, decremented, 0).
 type(7, error, 1).
 
+%%	by_type_name(+, ?, +, ?) is det.
+%%	by_type_name(+, ?, ?, ?) is nondeterm.
 by_type_name(Tables, KindName, SymbolIndex, Symbol) :-
+    ground(SymbolIndex),
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
     item:get(kind, Symbol, KindId),
     type(KindId, KindName, _).
+
+by_type_name(Tables, KindName, SymbolIndex, Symbol) :-
+    var(SymbolIndex),
+    type(KindId, KindName, _),
+    table:items(symbol_table, Tables, SymbolIndex, Symbol),
+    item:get(kind, Symbol, KindId).
 
 token(Tables, SymbolIndex, Data, SymbolIndex-Token) :-
     by_type_name(Tables, KindName, SymbolIndex, _),
