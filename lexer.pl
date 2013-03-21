@@ -47,24 +47,40 @@ scan_input(Lexer, TokenN, Groups0, GroupsN) -->
     { debug_token_read(Lexer, TokenN) }.
 
 % analyze_lexical_group(+, +, -, +, -) is det.
-analyze_lexical_group(Lexer, Lookahead, Token,
+analyze_lexical_group(Lexer, Lookahead, TokenN,
                       Groups0, GroupsN) -->
+    { Lookahead = SymbolIndex-group_start(GroupStart) },
+    advance(Lookahead),
+    !,
     {
-     Lookahead = SymbolIndex-group_start(GroupStart),
-     !,
      Lexer = lexer(chars-_, dfa-_, last_accept-_, tables-Tables),
      group:by_symbol(Tables, start_index-SymbolIndex,
                      _GroupIndex, Group),
      item:get(container_index, Group, ContainerIndex),
-     symbol:token(Tables, ContainerIndex, GroupStart, Token),
-     debug(lexer, '~p', g(Group, Token) ),
-     (   (   stack:empty(Groups)
-         ;   stack:peek(Groups, _Top)
+     symbol:token(Tables, ContainerIndex, GroupStart, Token0),
+     debug(lexer, '~p', g(Group, Token0) ),
+     (   (   stack:empty(Groups0)
+         ;   stack:peek(Groups0, group(Top)),
+             group:nestable(Top, SymbolIndex)
          )
-     ->  stack:push(Groups0, group(Token), GroupsN)
+     ->  stack:push(Groups0, group(Group), Groups1)
+     ;   Groups1 = Groups0
      )
     },
-    advance(Lookahead).
+    analyze_lexical_group(Lexer, Token0, TokenN, Groups1, GroupsN).
+
+analyze_lexical_group(Lexer, Token0, TokenN, Groups0, GroupsN) -->
+    { stack:peek(Groups0, group(Top)),
+      item:get(advance_mode, Top, AdvanceIndex),
+      group:advance_mode(AdvanceIndex, AdvanceMode)
+    },
+    (   { AdvanceMode = character }
+    ->  [Input],
+        { char_and_code(Input, Character, _Code),
+          symbol:append(Token0, Character, Token1)
+        }
+    ),
+    analyze_lexical_group(Lexer, Token1, TokenN, Groups0, GroupsN).
 
 analyze_lexical_group(_Lexer,
                       Token, Token,

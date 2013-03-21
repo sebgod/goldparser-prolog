@@ -34,7 +34,7 @@ set_entries(Item, Entries, NewItem) :-
         set_entries(Item, EntryTerm, NewItem)
     ).
 
-%%	entries_to_list(+EntryTerm, ?Entries:list) is det.
+%%	entries_to_list(+EntryTerm:term, ?Entries:list) is det.
 % converts the term entry to a list of entries (using univ).
 % succeeds if entries is already a list.
 entries_to_list(Entries, Entries) :-

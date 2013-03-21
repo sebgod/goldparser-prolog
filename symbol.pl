@@ -2,14 +2,15 @@
           [
            type/3,
            by_type_name/4,
-           token/4
+           token/4,
+           append/3
         ]).
 
 :- use_module(table, []).
 :- use_module(item, []).
 
-%%    type(+Number:int, +Name:atom) is det.
-%%    type(?Number:int, ?Name:atom) is nondet.
+%%  type(+Number:int, +Name:atom) is semidet.
+%%  type(?Number:int, ?Name:atom) is nondet.
 %
 % Represents the symbol types used in the gold parser version 5.0.
 %
@@ -25,7 +26,8 @@
 %
 % * eof
 %   End Character - End of File.
-%   This symbol is used to represent the end of the file or the end of the source input.
+%   This symbol is used to represent the end of the file
+%   or the end of the source input.
 %
 % * group_start
 %   Lexical group start.
@@ -50,26 +52,37 @@ type(5, ground_end, 1).
 type(6, decremented, 0).
 type(7, error, 1).
 
-%%	by_type_name(+, ?, +, ?) is det.
-%%	by_type_name(+, ?, ?, ?) is nondeterm.
-by_type_name(Tables, KindName, SymbolIndex, Symbol) :-
+%%	by_type_name(+Tables, ?Name, +SymbolIndex, ?Symbol) is semidet.
+%%  by_type_name(+Tables, ?Name, ?SymbolIndin, ?Symbol) is nondet.
+by_type_name(Tables, Name, SymbolIndex, Symbol) :-
     ground(SymbolIndex),
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
     item:get(kind, Symbol, KindId),
-    type(KindId, KindName, _).
+    type(KindId, Name, _).
 
-by_type_name(Tables, KindName, SymbolIndex, Symbol) :-
+by_type_name(Tables, Name, SymbolIndex, Symbol) :-
     var(SymbolIndex),
-    type(KindId, KindName, _),
+    type(KindId, Name, _),
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
     item:get(kind, Symbol, KindId).
 
-token(Tables, SymbolIndex, Data, SymbolIndex-Token) :-
-    by_type_name(Tables, KindName, SymbolIndex, _),
-    type(_, KindName, Args),
-    functor(Token, KindName, Args),
+%%	token(+Tables, +SymbolIndex, +Chars, -Token) is semidet.
+token(Tables, SymbolIndex, Chars, SymbolIndex-Token) :-
+    by_type_name(Tables, Name, SymbolIndex, _),
+    type(_, Name, Args),
+    functor(Token, Name, Args),
     (   Args > 0
-    ->  arg(1, Token, Data)
+    ->  arg(1, Token, Chars)
+    ;   true
+    ).
+
+append(SymbolIndex-Data0, Chars, SymbolIndex-DataN) :-
+    functor(Data0, Name, Args),
+    functor(DataN, Name, Args),
+    (   Args > 0
+    ->  arg(1, Data0, Chars0),
+        atom_concat(Chars0, Chars, CharsN),
+        arg(1, DataN, CharsN)
     ;   true
     ).
 
