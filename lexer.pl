@@ -129,36 +129,30 @@ advance(Token) -->
     list_skip(Length).
 
 lookahead(Lexer, Token, InputChars, InputChars) :-
-    read_token(Lexer, Token, InputChars, _).
+    read_token(Lexer, Token, InputChars).
 
 read_token(lexer(chars-Chars0, dfa-DFAIndex,
                  last_accept-LastAccept, tables-Tables),
-           Token) -->
-    (   [Input],
-        {
-         table:item(dfa_table, Tables, DFAIndex, DFA),
-         char_and_code(Input, Char, Code),
-         dfa:find_edge(Tables, DFA, Code, TargetIndex)
-        }
-    ->  {
-         table:item(dfa_table, Tables, TargetIndex, TargetDFA),
-         dfa:accept(TargetDFA, Accept),
-         atom_concat(Chars0, Char, CharsN),
-         NewState = lexer(chars-CharsN, dfa-TargetIndex,
-                          last_accept-Accept, tables-Tables)
-        },
-        read_token(NewState, Token)
-    ;   {
-         (   LastAccept \= none
-         ->  symbol:token(Tables, LastAccept, Chars0, Token)
-         ;   (   ground(Input)
-             ->  symbol:by_type_name(Tables, error, Index, _),
-                 Token = Index-error(Input)
-             ;   symbol:by_type_name(Tables, eof, Index, _),
-                 Token = Index-eof
-             )
-         )
-        }
+           Token, InputChars) :-
+    (   InputChars = [Input | InputR],
+        table:item(dfa_table, Tables, DFAIndex, DFA),
+        char_and_code(Input, Char, Code),
+        dfa:find_edge(Tables, DFA, Code, TargetIndex)
+    ->  table:item(dfa_table, Tables, TargetIndex, TargetDFA),
+        dfa:accept(TargetDFA, Accept),
+        atom_concat(Chars0, Char, CharsN),
+        NewState = lexer(chars-CharsN, dfa-TargetIndex,
+                         last_accept-Accept, tables-Tables),
+        read_token(NewState, Token, InputR)
+    ;   (   LastAccept \= none
+        ->  symbol:token(Tables, LastAccept, Chars0, Token)
+        ;   (   ground(Input)
+            ->  symbol:by_type_name(Tables, error, Index, _),
+                Token = Index-error(Input)
+            ;   symbol:by_type_name(Tables, eof, Index, _),
+                Token = Index-eof
+            )
+        )
     ).
 
 :- if(current_prolog_flag(debug, true)).
