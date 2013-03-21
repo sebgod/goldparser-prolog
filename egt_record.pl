@@ -122,7 +122,7 @@ fill_structure_acc(Typing, ValueEntry, Key-Value) :-
 
 fill_structure_acc(Typing, ValueEntry, _) :-
     throw(error('Wrong typing',
-                context(structure_type/3, [Typing, ValueEntry])
+                context(fill_structure_acc/3, [Typing, ValueEntry])
                )
          ).
 

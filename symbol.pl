@@ -48,14 +48,14 @@ type(1, terminal, 1).
 type(2, noise, 1).
 type(3, eof, 0).
 type(4, group_start, 1).
-type(5, ground_end, 1).
+type(5, group_end, 1).
 type(6, decremented, 0).
 type(7, error, 1).
 
 %%	by_type_name(+Tables, ?Name, +SymbolIndex, ?Symbol) is semidet.
 %%  by_type_name(+Tables, ?Name, ?SymbolIndin, ?Symbol) is nondet.
 by_type_name(Tables, Name, SymbolIndex, Symbol) :-
-    ground(SymbolIndex),
+    ground(SymbolIndex), !,
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
     item:get(kind, Symbol, KindId),
     type(KindId, Name, _).

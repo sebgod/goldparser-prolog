@@ -55,16 +55,13 @@ parse_tokens(Program0, ProgramN) -->
 parse_token(P0, PN) -->
     next_action(P0, ActionName, Target),
     perform(ActionName, Target, P0, PN),
-    {
-     debug_parser_step(P0, PN, ActionName, Target)
-    },
-    !.
+    !,
+    { debug_parser_step(P0, PN, ActionName, Target) }.
 
 parse_token(_P0, _P1, Tokens, Tokens) :-
-    [SymbolIndex-Data | _] = Tokens,
-    %symbol:type(SymbolType, SymbolTypeName),
+    [Token | _] = Tokens,
     throw(error(representation_error('unexpected token'),
-                context(parse_token//2, SymbolIndex-Data))).
+                context(parse_token//2, Token))).
 
 next_action(program(Tables, _State, AST),
             ActionName, Target,
