@@ -33,13 +33,10 @@ list_skip(Skip, [_ | Rest0], RestN) :-
 list_skip(0, List, List).
 
 char_and_code(Input, Char, Code) :-
-    atom(Input),
-    Char = Input,
-    char_code(Char, Code).
-
-char_and_code(Input, Char, Code) :-
-    integer(Input),
-    Code = Input,
+    (   integer(Input)
+    ->  Code = Input
+    ;   Char = Input
+    ),
     char_code(Char, Code).
 
 assoc_append_list(PrevAssoc, Key, Value, NewAssoc) :-

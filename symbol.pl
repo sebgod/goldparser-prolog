@@ -55,16 +55,9 @@ type(7, error, 1).
 %%	by_type_name(+Tables, ?Name, +SymbolIndex, ?Symbol) is semidet.
 %%  by_type_name(+Tables, ?Name, ?SymbolIndin, ?Symbol) is nondet.
 by_type_name(Tables, Name, SymbolIndex, Symbol) :-
-    ground(SymbolIndex), !,
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
     item:get(kind, Symbol, KindId),
     type(KindId, Name, _).
-
-by_type_name(Tables, Name, SymbolIndex, Symbol) :-
-    var(SymbolIndex),
-    type(KindId, Name, _),
-    table:items(symbol_table, Tables, SymbolIndex, Symbol),
-    item:get(kind, Symbol, KindId).
 
 %%	token(+Tables, +SymbolIndex, +Chars, -Token) is semidet.
 token(Tables, SymbolIndex, Chars, SymbolIndex-Token) :-

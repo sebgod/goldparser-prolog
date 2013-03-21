@@ -8,7 +8,6 @@
 
 :- use_module(table,  []).
 :- use_module(item,   []).
-:- use_module(stack,  []).
 
 advance_mode(0, token).
 advance_mode(1, character).
@@ -25,6 +24,6 @@ nestable(Group, NestableIndex) :-
     item:get(group_index, Nested, NestableIndex).
 
 append_chars(Groups0, Characters, GroupsN) :-
-    stack:pop(Groups0, group(Group, ContainerToken0), Groups1),
+    Groups0 = [group(Group, ContainerToken0) | Groups1],
     symbol:append(ContainerToken0, Characters, ContainerToken1),
-    stack:push(Groups1, group(Group, ContainerToken1), GroupsN).
+    GroupsN = [group(Group, ContainerToken1) | Groups1 ].

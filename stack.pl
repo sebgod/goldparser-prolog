@@ -1,4 +1,10 @@
-:- module(stack, [empty/1 ,push/3, peek/2, pop/3, rpop/4]).
+:- module(stack, [
+                  empty/1,
+                  push/3,
+                  peek/2,
+                  pop/3,
+                  rpop/4
+                 ]).
 
 empty([]).
 
