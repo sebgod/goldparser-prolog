@@ -128,20 +128,22 @@ fill_structure_acc(Typing, ValueEntry, _) :-
 
 read_record(Stream, 'M', record(multitype, NumberOfEntries, Entries)) :-
     egt_primitive:read_ushort(Stream, NumberOfEntries),
-    read_multitype_entries(Stream, NumberOfEntries, Entries),
+    (   NumberOfEntries >= 0
+    ->  read_multitype_entries(Stream, NumberOfEntries, Entries)
+    ),
     !.
 
 read_record(_Stream, Unknown, _Record) :-
     throw(error('Invalid record', context(read_record/3, Unknown))).
 
+read_multitype_entries(_, 0, []) :- !.
+
 read_multitype_entries(Stream, NumberOfEntries, [Entry | Entries]) :-
-    NumberOfEntries > 0,
     egt_primitive:read_ascii_char(Stream, Type),
     !,
     read_multitype_entry(Stream, Type, Entry),
     Remain is NumberOfEntries - 1,
     read_multitype_entries(Stream, Remain, Entries).
-read_multitype_entries(_, 0, []).
 
 read_multitype_entry(_Stream, 'E', empty) :- !.
 
