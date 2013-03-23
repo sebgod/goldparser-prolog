@@ -13,12 +13,12 @@ member(Ranges, Code, Left, Right) :-
     arg(Middle, Ranges, Range),
     item:get(start_character, Range, Start),
     item:get(end_character, Range, End),
-    (    between(Start, End, Code)
+    (   between(Start, End, Code)
     ->  !
     ;   Left < Right,
         (   Code < Start
         ->  Left1 is Left, Right1 is Middle
         ;   Left1 is Middle + 1, Right1 is Right
         ),
-         member(Ranges, Code, Left1, Right1)
+        member(Ranges, Code, Left1, Right1)
     ).
