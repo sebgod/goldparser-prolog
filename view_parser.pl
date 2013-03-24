@@ -1,4 +1,3 @@
-
 :- module(view_parser,
       [ view_parser/1, display/3 ]).
 
@@ -28,14 +27,14 @@ display_section(Kind, Parser, From, To) :-
 
 iterate(Table, Tables, ItemIndex, Entry) :-
     table:items(Table, Tables, ItemIndex, Item),
-    item:entries(Item, Entry).
+    item:entries_nd(Item, Entry).
 
 %display_dfa_states(parser(_G, Tables, _S), From, To) :-
 %    iterate(dfa_table, Tables, DFAIndex, DFA, _).
 
 display_lalr_states(parser(_G, Tables), From, To) :-
     iterate(lalr_table, Tables, LalrIndex, Action),
-    item:get(action, Action, ActionType),
+    item:value(action, Action, ActionType),
     action:type(ActionType, Name),
     display_lalr_action(Tables, LalrIndex, Name, Action, From, To).
 
@@ -45,14 +44,14 @@ display_rules(parser(_G, Tables), From, To) :-
 
 display_production(Tables, Rule, From, To) :-
     display_rule(From, Tables, Rule),
-    item:entries(Rule, Symbol),
-    item:get(symbol, Symbol, SymbolIndex),
+    item:entries_nd(Rule, Symbol),
+    item:value(symbol, Symbol, SymbolIndex),
     display_symbol(To, Tables, SymbolIndex).
 
 
 display_lalr_action(Tables, LalrIndex, Name, Action, From, To) :-
-    item:get(target, Action, Target),
-    item:get(symbol_index, Action, SymbolIndex),
+    item:value(target, Action, Target),
+    item:value(symbol_index, Action, SymbolIndex),
     (    format(atom(From), 'lalr-~d', [LalrIndex]),
          format(atom(To), '~w ~d -> ~d',
                 [Name, LalrIndex, Target])
@@ -81,8 +80,8 @@ display_rule(Atom, Tables, Index) :-
     display_rule(Atom, Tables, Rule).
 
 display_rule(Atom, Tables, Rule) :-
-    item:get(head_index, Rule, HeadIndex),
-    item:get(index, Rule, RuleIndex),
+    item:value(head_index, Rule, HeadIndex),
+    item:value(index, Rule, RuleIndex),
     display_symbol(Head, Tables, HeadIndex),
     format(atom(Atom), '~w-~d', [Head, RuleIndex]).
 
@@ -92,11 +91,13 @@ display_symbol(Atom, Tables, Index) :-
     display_symbol(Atom, Tables, Symbol).
 
 display_symbol(Atom, _Tables, Symbol) :-
-    item:get(name, Symbol, Name),
-    item:get(kind, Symbol, Kind),
+    item:value(name, Symbol, Name),
+    item:value(kind, Symbol, Kind),
     symbol:type(Kind, KindName, _),
     display_symbol_format(KindName, Format),
     format(atom(Atom), Format, [Name]).
 
 display_symbol_format(nonterminal, '<~w>') :- !.
 display_symbol_format(_, '~w').
+
+

@@ -67,8 +67,8 @@ next_action(program(Tables, _State, AST),
             ActionName, Target,
             Tokens, Tokens
            ) :-
-    lalr:get(Tables, AST, Lalr),
-    item:get_entries(Lalr, Actions),
+    lalr:peek(Tables, AST, Lalr),
+    item:entries(Lalr, Actions),
     lookahead(Tokens, SymbolTypeName, SymbolIndex),
     symbol_to_action(SymbolTypeName, SymbolIndex,
                           Actions, ActionName, Target).
@@ -85,9 +85,9 @@ symbol_to_action(SymbolTypeName, SymbolIndex,
                  Actions, ActionName, Target) :-
     memberchk(SymbolTypeName, [terminal, eof, nonterminal]),
     action:find(Actions, SymbolIndex, FoundAction),
-    item:get(action, FoundAction, ActionType),
+    item:value(action, FoundAction, ActionType),
     action:type(ActionType, ActionName),
-    item:get(target, FoundAction, Target).
+    item:value(target, FoundAction, Target).
 
 perform(skip, _Target, P, P) --> [_Skipped].
 
@@ -104,15 +104,15 @@ perform(reduce, Target,
         Tokens, Tokens
        ) :-
     table:item(rule_table, Tables, Target, Rule),
-    item:get(head_index, Rule, HeadIndex),
+    item:value(head_index, Rule, HeadIndex),
     symbol:by_type_name(Tables, nonterminal, HeadIndex, Head),
-    (   item:get_entries(Rule, RuleEntries)
+    (   item:entries(Rule, RuleEntries)
     ->  RuleSymbols = RuleEntries
     ;   RuleSymbols = []
     ),
     item:entry_size(RuleSymbols, RuleSymbolSize),
     stack:rpop(AST0, RuleSymbolSize, Handles, AST1),
-    item:get(name, Head, HeadName),
+    item:value(name, Head, HeadName),
     Reduction =.. [HeadName | Handles],
     update_reduction_state(Tables, HeadIndex-Reduction,  AST1, ASTN).
 
@@ -131,10 +131,14 @@ perform(accept, _Target,
     ).
 
 update_reduction_state(Tables, HeadIndex-Reduction, AST0, ASTN) :-
-    lalr:get(Tables, AST0, LalrPrev),
-    item:get_entries(LalrPrev, Actions),
+    lalr:peek(Tables, AST0, LalrPrev),
+    item:entries(LalrPrev, Actions),
     symbol_to_action(nonterminal, HeadIndex, Actions, goto, Goto),
     stack:push(AST0, s(Goto, HeadIndex-Reduction), ASTN).
+
+
+
+
 
 
 

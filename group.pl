@@ -17,11 +17,11 @@ ending_mode(1, closed).
 
 by_symbol(Tables, Kind-SymbolIndex, GroupIndex, Group) :-
     table:items(group_table, Tables, GroupIndex, Group),
-    item:get(Kind, Group, SymbolIndex).
+    item:value(Kind, Group, SymbolIndex).
 
 nestable(Group, NestableIndex) :-
-    item:entries(Group, Nested),
-    item:get(group_index, Nested, NestableIndex).
+    item:entries_nd(Group, Nested),
+    item:value(group_index, Nested, NestableIndex).
 
 append_chars(Groups0, Characters, GroupsN) :-
     Groups0 = [group(Group, ContainerToken0, A, E) | Groups1],

@@ -1,12 +1,12 @@
 :- module(item, [
                  empty/1,
-                 get/3,
-                 set/4,
-                 get_entries/2,
-                 set_entries/3,
+                 value/3,
+                 entries/2,
+                 update_value/4,
+                 update_entries/3,
                  entries_to_list/2,
                  entry_member/2,
-                 entries/2,
+                 entries_nd/2,
                  entry_size/2,
                  merge_keep/3,
                  merge_replace/3
@@ -17,21 +17,21 @@
 empty(Item) :-
     empty_assoc(Item).
 
-get(Name, Item, Value) :-
+value(Name, Item, Value) :-
     get_assoc(Name, Item, Value).
 
-set(Name, Item, Value, NewItem) :-
+update_value(Name, Item, Value, NewItem) :-
     put_assoc(Name, Item, Value, NewItem).
 
-get_entries(Item, Entries) :-
-    get('_entries', Item, Entries).
+entries(Item, Entries) :-
+    value('_entries', Item, Entries).
 
-set_entries(Item, Entries, NewItem) :-
+update_entries(Item, Entries, NewItem) :-
     (   functor(Entries, entries, _)
     ->  put_assoc('_entries', Item, Entries, NewItem)
     ;   must_be(list, Entries),
         EntryTerm =.. [entries | Entries],
-        set_entries(Item, EntryTerm, NewItem)
+        update_entries(Item, EntryTerm, NewItem)
     ).
 
 %%	entries_to_list(+EntryTerm:term, ?Entries:list) is det.
@@ -46,8 +46,8 @@ entry_member(Entries, Entry) :-
     entries_to_list(Entries, EntryList),
     member(Entry, EntryList).
 
-entries(Item, Entry) :-
-    get_entries(Item, Entries),
+entries_nd(Item, Entry) :-
+    entries(Item, Entries),
     entry_member(Entries, Entry).
 
 entry_size(Entries, Size) :-
@@ -57,11 +57,19 @@ entry_size(Entries, Size) :-
     length(Entries, Size), !.
 
 merge_keep(Key-Value, Item0, ItemN) :-
-    (   get(Key, Item0, _Keep)
+    (   value(Key, Item0, _Keep)
     ->  ItemN = Item0
-    ;   set(Key, Item0, Value, ItemN)
+    ;   update_value(Key, Item0, Value, ItemN)
     ).
 
 merge_replace(Key-Value, Item0, ItemN) :-
-    set(Key, Item0, Value, ItemN).
+    update_value(Key, Item0, Value, ItemN).
+
+
+
+
+
+
+
+
 

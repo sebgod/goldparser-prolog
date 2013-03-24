@@ -39,7 +39,7 @@ type(4, accept).
 
 find(Actions, SymbolIndex, Action) :-
     once((item:entry_member(Actions, Action),
-          item:get(symbol_index, Action, SymbolIndex)
+          item:value(symbol_index, Action, SymbolIndex)
         )).
 
 list(Actions, List) :-

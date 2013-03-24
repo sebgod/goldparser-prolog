@@ -64,14 +64,14 @@ scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
      Lexer = lexer(chars-_, dfa-_, last_accept-_, tables-Tables),
      group:by_symbol(Tables, start_index-SymbolIndex,
                      _GroupIndex, Group),
-     item:get(container_index, Group, ContainerIndex),
+     item:value(container_index, Group, ContainerIndex),
      symbol:token(Tables, ContainerIndex, GroupStart, ContainerToken),
      (   (   Groups0 = []
          ;   Groups0 = [group(Top, _, _, _) | _],
              group:nestable(Top, SymbolIndex)
          )
-     ->  item:get(advance_mode, Group, AdvanceIndex),
-         item:get(ending_mode, Group, EndingIndex),
+     ->  item:value(advance_mode, Group, AdvanceIndex),
+         item:value(ending_mode, Group, EndingIndex),
          group:advance_mode(AdvanceIndex, AdvanceMode),
          group:ending_mode(EndingIndex, EndingMode),
          GroupRec = group(Group, ContainerToken, AdvanceMode, EndingMode),
@@ -87,7 +87,7 @@ scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
     !,
     (   {
           Lookahead0 = SymbolIndex-_,
-          item:get(end_index, Top, SymbolIndex)
+          item:value(end_index, Top, SymbolIndex)
         }
     ->  {  Groups0 = [group(_, Token, _, EndingMode) | Groups1]
         },
@@ -138,7 +138,8 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
     (   InputChars = [Input | InputR],
         table:item(dfa_table, Tables, DFAIndex, DFA),
         char_and_code(Input, Char, Code),
-        dfa:find_edge(Tables, DFA, Code, TargetIndex)
+        table:by_name(character_set_table, Tables, Charsets),
+        dfa:find_edge(Charsets, DFA, Code, TargetIndex)
     ->  table:item(dfa_table, Tables, TargetIndex, TargetDFA),
         dfa:accept(TargetDFA, Accept),
         atom_concat(Chars0, Char, CharsN),

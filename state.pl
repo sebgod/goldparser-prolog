@@ -8,7 +8,7 @@
 :- use_module(item, []).
 
 current(State, Kind-KindState) :-
-    item:get(Kind, State, KindState).
+    item:value(Kind, State, KindState).
 
 current_list(State, List) :-
     maplist(current(State), List).

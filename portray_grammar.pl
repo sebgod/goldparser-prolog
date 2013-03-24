@@ -19,8 +19,8 @@ user:portray(Grammar) :-
     Grammar = grammar(header(Header), _Assoc),
     grammar:properties(Grammar, Props),
     forall(member(Property, Props),
-          (   item:get(name, Property, Name),
-              item:get(value, Property, Value),
+          (   item:value(name, Property, Name),
+              item:value(value, Property, Value),
               format(' ~w: ~w', [Name, Value])
           )
           ),
@@ -31,8 +31,7 @@ user:portray(Tables) :-
     get_assoc(rule_table, Tables, _),
     get_assoc(symbol_table, Tables, _),
     assoc_to_keys(Tables, Keys),
-    length(Keys, KeyCount),
-    format('_Tables(~d)', [KeyCount]).
+    format('_Tables(~w)', [Keys]).
 
 user:portray(Assoc) :-
     assoc_to_list(Assoc, List),

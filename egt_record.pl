@@ -1,40 +1,22 @@
 :- module(egt_record, [
-               sort_record/3,
-               read_record/3
-              ]).
+                       sort_record/3,
+                       read_record/3
+                      ]).
 
 :- use_module(egt_primitive, []).
 :- use_module(support).
 
-descriptor('p', property,
-           [
-            short(index),
-            string(name),
-            string(value)
-           ]).
-descriptor('t', table_counts,
-           [
-            short(symbol_table),
-            short(character_set_table),
-            short(rule_table),
-            short(dfa_table),
-            short(lalr_table),
-            short(group_table)
-           ]).
-descriptor('I', initial_states,
-           [short(dfa), short(lalr)]
-          ).
 descriptor('c', character_set_table,
            [
             short(index),
             short(unicode_plane),
             short(range_count)
            ]).
-descriptor('S', symbol_table,
+descriptor('D', dfa_table,
            [
             short(index),
-            string(name),
-            short(kind)
+            boolean(accept_state),
+            short(accept_index)
            ]).
 descriptor('g', group_table,
            [
@@ -46,18 +28,37 @@ descriptor('g', group_table,
             short(advance_mode),
             short(ending_mode)
            ]).
+descriptor('I', initial_states,
+           [short(dfa), short(lalr)]
+          ).
+descriptor('L', lalr_table, [short(index)]).
+descriptor('p', property,
+           [
+            short(index),
+            string(name),
+            string(value)
+           ]).
 descriptor('R', rule_table,
            [
             short(index),
             short(head_index)
            ]).
-descriptor('D', dfa_table,
+descriptor('S', symbol_table,
            [
             short(index),
-            boolean(accept_state),
-            short(accept_index)
+            string(name),
+            short(kind)
            ]).
-descriptor('L', lalr_table, [short(index)]).
+descriptor('t', table_counts,
+           [
+            short(symbol_table),
+            short(character_set_table),
+            short(rule_table),
+            short(dfa_table),
+            short(lalr_table),
+            short(group_table)
+           ]).
+% this must match the last entry (table counts for now)
 
 variable_part(rule_table, [short(symbol)]).
 variable_part(lalr_table,
