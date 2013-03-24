@@ -30,7 +30,9 @@ user:portray(Tables) :-
     is_assoc(Tables),
     get_assoc(rule_table, Tables, _),
     get_assoc(symbol_table, Tables, _),
-    write('_Tables').
+    assoc_to_keys(Tables, Keys),
+    length(Keys, KeyCount),
+    format('_Tables(~d)', [KeyCount]).
 
 user:portray(Assoc) :-
     assoc_to_list(Assoc, List),

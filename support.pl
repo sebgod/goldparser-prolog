@@ -25,12 +25,16 @@ list_trim(Source, Target, Trimmed, Rest) :-
     length(Trimmed, Length),
     append(Trimmed, Rest, Target).
 
+
+list_skip(2, [_, _ | List], List).
+list_skip(1, [_ | List], List).
+list_skip(0, List, List).
+
 list_skip(Skip, [_ | Rest0], RestN) :-
-    Skip > 0,
+    Skip > 2,
+    !,
     SkipN is Skip - 1,
     list_skip(SkipN, Rest0, RestN).
-
-list_skip(0, List, List).
 
 char_and_code(Input, Char, Code) :-
     (   integer(Input)

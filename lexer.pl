@@ -148,9 +148,9 @@ read_token(lexer(chars-Chars0, dfa-DFAIndex,
     ;   (   LastAccept \= none
         ->  symbol:token(Tables, LastAccept, Chars0, Token)
         ;   (   ground(Input)
-            ->  once(symbol:by_type_name(Tables, error, Index, _)),
+            ->  symbol:by_type_name(Tables, error, Index, _),
                 Token = Index-error(Input)
-            ;   once(symbol:by_type_name(Tables, eof, Index, _)),
+            ;   symbol:by_type_name(Tables, eof, Index, _),
                 Token = Index-eof
             )
         )
