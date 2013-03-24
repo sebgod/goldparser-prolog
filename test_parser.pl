@@ -70,4 +70,3 @@ scan_and_parse_dcg(Program0, Lexer, ProgramN) -->
     },
     scan_and_parse_dcg(Program1, Lexer, ProgramN).
 
-%scan_and_parse_dcg(Program, _, Program, [], []) :- !.
