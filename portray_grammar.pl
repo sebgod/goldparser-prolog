@@ -26,12 +26,8 @@ user:portray(Grammar) :-
           ),
     format(' version: ~w', [Header]).
 
-user:portray(Tables) :-
-    is_assoc(Tables),
-    get_assoc(rule_table, Tables, _),
-    get_assoc(symbol_table, Tables, _),
-    assoc_to_keys(Tables, Keys),
-    format('_Tables(~w)', [Keys]).
+user:portray(tables(_, _, _, _, _, _, _)) :-
+    write('_Tables').
 
 user:portray(Assoc) :-
     assoc_to_list(Assoc, List),

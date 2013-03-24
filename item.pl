@@ -27,12 +27,9 @@ entries(Item, Entries) :-
     value('_entries', Item, Entries).
 
 update_entries(Item, Entries, NewItem) :-
-    (   functor(Entries, entries, _)
-    ->  put_assoc('_entries', Item, Entries, NewItem)
-    ;   must_be(list, Entries),
-        EntryTerm =.. [entries | Entries],
-        update_entries(Item, EntryTerm, NewItem)
-    ).
+    must_be(list, Entries),
+    EntryTerm =.. [entries | Entries],
+    update_value('_entries', Item, EntryTerm, NewItem).
 
 %%	entries_to_list(+EntryTerm:term, ?Entries:list) is det.
 % converts the term entry to a list of entries (using univ).

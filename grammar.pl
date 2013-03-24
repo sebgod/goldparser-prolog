@@ -9,6 +9,7 @@
                    ]).
 
 :- use_module(library(assoc)).
+:- use_module(table, []).
 :- use_module(item, []).
 
 value(Key, grammar(_H, Grammar), Value) :-
@@ -36,16 +37,14 @@ tables(Grammar, Tables) :-
     length(Properties, NumberOfProperties),
     items_to_list(Counts, CountsList),
     CountsWithProperties = [property-NumberOfProperties | CountsList],
-    empty_assoc(Tables0),
-    %empty_tables(Tables0, CountsWithProperties),
-    tables(Grammar, CountsWithProperties, Tables0, Tables).
+    empty_tables(Tables, CountsWithProperties),
+    tables(Grammar, Tables, CountsWithProperties).
 
-tables(_Grammar, [], T, T).
+tables(_Grammar, _, []).
 
-tables(Grammar, [Name-Size | Rest], Tables0, Tables) :-
+tables(Grammar, Tables, [Name-Size | Rest]) :-
     number(Size),
     functor(Table, Name, Size),
-    put_assoc(Name, Tables0, Table, Tables1),
     (   value(Name, Grammar, Items)
     ->  forall(
             member(Item, Items),
@@ -61,7 +60,11 @@ tables(Grammar, [Name-Size | Rest], Tables0, Tables) :-
               )
     ;   true
     ),
-    tables(Grammar, Rest, Tables1, Tables).
+    table:index(Name, TableIndex),
+    TableIndex1 is TableIndex + 1,
+    nb_linkarg(TableIndex1, Tables, Table),
+    tables(Grammar, Tables, Rest).
+
 
 
 
