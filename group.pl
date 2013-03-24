@@ -20,7 +20,7 @@ by_symbol(Tables, Kind-SymbolIndex, GroupIndex, Group) :-
     item:get(Kind, Group, SymbolIndex).
 
 nestable(Group, NestableIndex) :-
-    item:entries(Group, Nested, _),
+    item:entries(Group, Nested),
     item:get(group_index, Nested, NestableIndex).
 
 append_chars(Groups0, Characters, GroupsN) :-

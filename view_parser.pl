@@ -26,15 +26,15 @@ display(Parser, From, To) :-
 display_section(Kind, Parser, From, To) :-
     call(Kind, Parser, From, To).
 
-iterate(Table, Tables, ItemIndex, Entry, EntryIndex) :-
+iterate(Table, Tables, ItemIndex, Entry) :-
     table:items(Table, Tables, ItemIndex, Item),
-    item:entries(Item, Entry, EntryIndex).
+    item:entries(Item, Entry).
 
 %display_dfa_states(parser(_G, Tables, _S), From, To) :-
 %    iterate(dfa_table, Tables, DFAIndex, DFA, _).
 
 display_lalr_states(parser(_G, Tables), From, To) :-
-    iterate(lalr_table, Tables, LalrIndex, Action, _),
+    iterate(lalr_table, Tables, LalrIndex, Action),
     item:get(action, Action, ActionType),
     action:type(ActionType, Name),
     display_lalr_action(Tables, LalrIndex, Name, Action, From, To).
@@ -45,7 +45,7 @@ display_rules(parser(_G, Tables), From, To) :-
 
 display_production(Tables, Rule, From, To) :-
     display_rule(From, Tables, Rule),
-    item:entries(Rule, Symbol, _),
+    item:entries(Rule, Symbol),
     item:get(symbol, Symbol, SymbolIndex),
     display_symbol(To, Tables, SymbolIndex).
 

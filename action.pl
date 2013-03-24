@@ -38,7 +38,7 @@ type(3, goto).
 type(4, accept).
 
 find(Actions, SymbolIndex, Action) :-
-    once((item:entry_member(Actions, Action, _ActionIndex),
+    once((item:entry_member(Actions, Action),
           item:get(symbol_index, Action, SymbolIndex)
         )).
 

@@ -5,8 +5,8 @@
                  get_entries/2,
                  set_entries/3,
                  entries_to_list/2,
-                 entry_member/3,
-                 entries/3,
+                 entry_member/2,
+                 entries/2,
                  entry_size/2,
                  merge_keep/3,
                  merge_replace/3
@@ -42,13 +42,13 @@ entries_to_list(Entries, Entries) :-
 entries_to_list(EntryTerm, Entries) :-
     EntryTerm =.. [entries | Entries].
 
-entry_member(Entries, Entry, EntryIndex) :-
-    arg(ArgIndex, Entries, Entry),
-    EntryIndex is ArgIndex - 1.
+entry_member(Entries, Entry) :-
+    entries_to_list(Entries, EntryList),
+    member(Entry, EntryList).
 
-entries(Item, Entry, EntryIndex) :-
+entries(Item, Entry) :-
     get_entries(Item, Entries),
-    entry_member(Entries, Entry, EntryIndex).
+    entry_member(Entries, Entry).
 
 entry_size(Entries, Size) :-
     functor(Entries, entries, Size), !.
