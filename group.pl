@@ -17,7 +17,10 @@ ending_mode(1, closed).
 
 by_symbol(Tables, Kind-SymbolIndex, GroupIndex, Group) :-
     table:items(group_table, Tables, GroupIndex, Group),
-    item:value(Kind, Group, SymbolIndex).
+    (   item:value(Kind, Group, SymbolIndex)
+    ->  !
+    ;   true
+    ).
 
 nestable(Group, NestableIndex) :-
     item:entries_nd(Group, Nested),

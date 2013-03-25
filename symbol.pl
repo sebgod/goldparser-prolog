@@ -56,9 +56,11 @@ type(7, error, 1).
 %%  by_type_name(+Tables, ?Name, ?SymbolIndex, ?Symbol) is nondet.
 by_type_name(Tables, Name, SymbolIndex, Symbol) :-
     table:items(symbol_table, Tables, SymbolIndex, Symbol),
-    item:value(kind, Symbol, KindId),
-    type(KindId, Name, _),
-    !.
+    (   item:value(kind, Symbol, KindId)
+    ->  !
+    ;   true
+    ),
+    type(KindId, Name, _).
 
 by_index(Tables, SymbolIndex, Name, Args) :-
     must_be(integer, SymbolIndex),

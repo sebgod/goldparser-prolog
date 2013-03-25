@@ -26,9 +26,9 @@ list_trim(Source, Target, Trimmed, Rest) :-
     append(Trimmed, Rest, Target).
 
 
-list_skip(2, [_, _ | List], List).
-list_skip(1, [_ | List], List).
-list_skip(0, List, List).
+list_skip(2, [_, _ | List], List) :- !.
+list_skip(1, [_ | List], List) :- !.
+list_skip(0, List, List) :- !.
 
 list_skip(Skip, [_ | Rest0], RestN) :-
     Skip > 2,
