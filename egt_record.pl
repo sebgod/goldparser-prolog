@@ -6,59 +6,55 @@
 :- use_module(egt_primitive, []).
 :- use_module(support).
 
-descriptor('c', character_set_table,
-           [
-            short(index),
-            short(unicode_plane),
-            short(range_count)
-           ]).
-descriptor('D', dfa_table,
-           [
-            short(index),
-            boolean(accept_state),
-            short(accept_index)
-           ]).
-descriptor('g', group_table,
-           [
-            short(index),
-            string(name),
-            short(container_index),
-            short(start_index),
-            short(end_index),
-            short(advance_mode),
-            short(ending_mode)
-           ]).
-descriptor('I', initial_states,
-           [short(dfa), short(lalr)]
-          ).
-descriptor('L', lalr_table, [short(index)]).
-descriptor('p', property,
-           [
-            short(index),
-            string(name),
-            string(value)
-           ]).
-descriptor('R', rule_table,
-           [
-            short(index),
-            short(head_index)
-           ]).
-descriptor('S', symbol_table,
-           [
-            short(index),
-            string(name),
-            short(kind)
-           ]).
-descriptor('t', table_counts,
-           [
-            short(symbol_table),
-            short(character_set_table),
-            short(rule_table),
-            short(dfa_table),
-            short(lalr_table),
-            short(group_table)
-           ]).
-% this must match the last entry (table counts for now)
+descriptor('c', character_set_table).
+descriptor('D', dfa_table).
+descriptor('g', group_table).
+descriptor('I', initial_states).
+descriptor('L', lalr_table).
+descriptor('p', property).
+descriptor('R', rule_table).
+descriptor('S', symbol_table).
+descriptor('t', table_counts).
+
+item(character_set_table, index,          0, short, item(V, _, _), V).
+item(character_set_table, unicode_plane,  1, short, item(_, V, _), V).
+item(character_set_table, range_count,    2, short, item(_, _, V), V).
+
+item(dfa_table, index,        0, short,   item(V, _, _), V).
+item(dfa_table, accept_state, 1, boolean, item(_, V, _), V).
+item(dfa_table, accept_index, 2, short,   item(_, _, V), V).
+
+item(group_table, index,          0, short,  item(V, _, _, _, _, _, _), V).
+item(group_table, name,           1, string, item(_, V, _, _, _, _, _), V).
+item(group_table, container_index, 2, short, item(_, _, V, _, _, _, _), V).
+item(group_table, start_index,    3, short,  item(_, _, _, V, _, _, _), V).
+item(group_table, end_index,      4, short,  item(_, _, _, _, V, _, _), V).
+item(group_table, advance_mode,   5, short,  item(_, _, _, _, _, V, _), V).
+item(group_table, ending_mode,    6, short,  item(_, _, _, _, _, _, V), V).
+
+item(initial_states, dfa,  0, short, item(V, _), V).
+item(initial_states, lalr, 1, short, item(_, V), V).
+
+item(lalr_table, index, 0, short, item(V, _), V).
+
+item(property, index, 0, short,  item(V, _, _), V).
+item(property, name,  1, string, item(_, V, _), V).
+item(property, value, 2, string, item(_, _, V), V).
+
+item(rule_table, index,      0, short, item(V, _), V).
+item(rule_table, head_index, 1, short, item(_, V), V).
+
+item(symbol_table, index, 0, short,  item(V, _, _), V).
+item(symbol_table, name,  1, string, item(_, V, _), V).
+item(symbol_table, kind,  2, short,  item(_, _, V), V).
+
+item(table_counts, symbol_table, 0, short, item(V, _, _, _, _, _), V).
+item(table_counts, character_set_table,
+     1, short, item(_, V, _, _, _, _), V).
+item(table_counts, rule_table,   2, short, item(_, _, V, _, _, _), V).
+item(table_counts, dfa_table,    3, short, item(_, _, _, V, _, _), V).
+item(table_counts, lalr_table,   4, short, item(_, _, _, _, V, _), V).
+item(table_counts, group_table,  5, short, item(_, _, _, _, _, V), V).
 
 variable_part(rule_table, [short(symbol)]).
 variable_part(lalr_table,
