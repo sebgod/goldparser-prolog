@@ -1,4 +1,6 @@
 :- module(item, [
+                 property/6,
+                 entry/6,
                  empty/1,
                  value/3,
                  entries/2,
@@ -13,6 +15,59 @@
                 ]).
 
 :- use_module(library(assoc)).
+
+property(character_set_table, index,          0, short, item(V, _, _, _E), V).
+property(character_set_table, unicode_plane,  1, short, item(_, V, _, _E), V).
+property(character_set_table, range_count,    2, short, item(_, _, V, _E), V).
+
+property(dfa_table, index,        0, short,   item(V, _, _, _E), V).
+property(dfa_table, accept_state, 1, boolean, item(_, V, _, _E), V).
+property(dfa_table, accept_index, 2, short,   item(_, _, V, _E), V).
+
+property(group_table, index,           0, short,  item(V, _, _, _, _, _, _, _E), V).
+property(group_table, name,            1, string, item(_, V, _, _, _, _, _, _E), V).
+property(group_table, container_index, 2, short,  item(_, _, V, _, _, _, _, _E), V).
+property(group_table, start_index,     3, short,  item(_, _, _, V, _, _, _, _E), V).
+property(group_table, end_index,       4, short,  item(_, _, _, _, V, _, _, _E), V).
+property(group_table, advance_mode,    5, short,  item(_, _, _, _, _, V, _, _E), V).
+property(group_table, ending_mode,     6, short,  item(_, _, _, _, _, _, V, _E), V).
+
+property(initial_states, dfa,  0, short, item(V, _), V).
+property(initial_states, lalr, 1, short, item(_, V), V).
+
+property(lalr_table, index, 0, short, item(V, _E), V).
+
+property(property, index, 0, short,  item(V, _, _), V).
+property(property, name,  1, string, item(_, V, _), V).
+property(property, value, 2, string, item(_, _, V), V).
+
+property(rule_table, index,      0, short, item(V, _, _E), V).
+property(rule_table, head_index, 1, short, item(_, V, _E), V).
+
+property(symbol_table, index, 0, short,  item(V, _, _), V).
+property(symbol_table, name,  1, string, item(_, V, _), V).
+property(symbol_table, kind,  2, short,  item(_, _, V), V).
+
+property(table_counts, symbol_table,        0, short, item(V, _, _, _, _, _), V).
+property(table_counts, character_set_table, 1, short, item(_, V, _, _, _, _), V).
+property(table_counts, rule_table,          2, short, item(_, _, V, _, _, _), V).
+property(table_counts, dfa_table,           3, short, item(_, _, _, V, _, _), V).
+property(table_counts, lalr_table,          4, short, item(_, _, _, _, V, _), V).
+property(table_counts, group_table,         5, short, item(_, _, _, _, _, V), V).
+
+entry(rule_table, symbol, 0, short, entry(V), V).
+
+entry(lalr_table, symbol_index, 0, short, entry(V, _, _), V).
+entry(lalr_table, action,       1, short, entry(_, V, _), V).
+entry(lalr_table, target,       2, short, entry(_, _, V), V).
+
+entry(dfa_table, character_set_index, 0, short, entry(V, _), V).
+entry(dfa_table, target_index,        1, short, entry(_, V), V).
+
+entry(character_set_table, start_character, 0, short, entry(V, _), V).
+entry(character_set_table, end_character,   1, short, entry(_, V), V).
+
+entry(group_table, group_index, 0, short, entry(V), V).
 
 empty(Item) :-
     empty_assoc(Item).
