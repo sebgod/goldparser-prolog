@@ -5,7 +5,8 @@
                     assoc_append_list/4,
                     safe_open_file/2,
                     safe_open_file/3,
-                    must_be_assoc/1
+                    must_be_assoc/1,
+                    diff_list_append/3
                    ]).
 
 :- meta_predicate
@@ -59,3 +60,5 @@ safe_open_file(File, StreamParser, Options) :-
         call(StreamParser, Stream),
         close(Stream)
                       ).
+
+diff_list_append(A-B, B-C, A-C).

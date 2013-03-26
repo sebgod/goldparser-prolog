@@ -14,8 +14,8 @@
 
 :- meta_predicate test_files(3, ?).
 
-grammar(gold, 'GOLD Meta-Language (2.6.0).egt').
-%grammar(expression, 'ParserTest.egt').
+%grammar(gold, 'GOLD Meta-Language (2.6.0).egt').
+grammar(expression, 'ParserTest.egt').
 
 grammar_test_files(expression, ['ParserTest.txt']).
 grammar_test_files(gold, ['GOLD Meta-Language (2.6.0).grm']).
