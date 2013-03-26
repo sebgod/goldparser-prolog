@@ -83,10 +83,7 @@ structure_type(Letter, TableName, Props) :-
     !.
 
 structure_type(Letter, _, _) :-
-    throw(error(representation_error,
-                context(structure_type/3, Letter)
-               )
-         ).
+    domain_error(descriptor/2, Letter).
 
 sort_record(Record, Key, Structure) :-
     Record = record(multitype, _, Entries),
@@ -120,12 +117,7 @@ fill_structure_acc(Type-Key, ValueEntry, Key-Value) :-
     ValueEntry =.. [Type, Value], !.
 
 fill_structure_acc(Typing, ValueEntry, _) :-
-    throw(error(representation_error,
-                context(fill_structure_acc/3,
-                        wrong_type(Typing, ValueEntry)
-                       )
-               )
-         ).
+    domain_error(Typing, ValueEntry).
 
 read_record(Stream, 'M', record(multitype, NumberOfEntries, Entries)) :-
     egt_primitive:read_ushort(Stream, NumberOfEntries),
