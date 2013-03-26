@@ -75,12 +75,15 @@ variable_part(character_set_table,
               ]).
 variable_part(group_table, [short(group_index)]).
 
-structure_type(Letter, Name, Props) :-
-    descriptor(Letter, Name, Props),
+structure_type(Letter, TableName, Props) :-
+    descriptor(Letter, TableName),
+    findall(Type-ItemName,
+            item(TableName, ItemName, _, Type, _, _),
+            Props),
     !.
 
 structure_type(Letter, _, _) :-
-    throw(error('Unknown structure type',
+    throw(error(representation_error,
                 context(structure_type/3, Letter)
                )
          ).
@@ -113,13 +116,14 @@ fill_structure_rest(Rest, Key, Structure0, Structure) :-
     append(Structure0, [Record], Structure1),
     fill_structure_rest(Next, Key, Structure1, Structure).
 
-fill_structure_acc(Typing, ValueEntry, Key-Value) :-
-    Typing =.. [Type, Key],
+fill_structure_acc(Type-Key, ValueEntry, Key-Value) :-
     ValueEntry =.. [Type, Value], !.
 
 fill_structure_acc(Typing, ValueEntry, _) :-
-    throw(error('Wrong typing',
-                context(fill_structure_acc/3, [Typing, ValueEntry])
+    throw(error(representation_error,
+                context(fill_structure_acc/3,
+                        wrong_type(Typing, ValueEntry)
+                       )
                )
          ).
 

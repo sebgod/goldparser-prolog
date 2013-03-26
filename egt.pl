@@ -25,7 +25,8 @@ read_structures(Stream) -->
     read_structures(Stream).
 read_structures(_, S, S).
 
-read_header(Stream, header(Header)) :- egt_primitive:read_utf16le_z(Stream, Header).
+read_header(Stream, header(Header)) :-
+    egt_primitive:read_utf16le_z(Stream, Header).
 
 read_structure(Stream) -->
     { egt_primitive:read_ascii_char(Stream, Type),
