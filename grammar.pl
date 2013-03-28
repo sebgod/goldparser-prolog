@@ -12,6 +12,12 @@
 :- use_module(table, []).
 :- use_module(item, []).
 
+%%	value(+Key:atom, +Grammar:term, -Value:list) is semidet.
+%%	value(+Key:atom, +Grammar:term, ?Value:list) is det.
+% retrieves the value for a given key from the grammar.
+% Currently, the grammar is using the AVL (in SWI-Prolog)
+% from library(assoc).
+% If the key is not found, Value is unified with the empty list.
 value(Key, grammar(_H, Grammar), Value) :-
     get_assoc(Key, Grammar, Value), !.
 
@@ -47,21 +53,19 @@ tables(_Grammar, _, []).
 tables(Grammar, Tables, [Name-Size | Rest]) :-
     number(Size),
     functor(Table, Name, Size),
-    (   value(Name, Grammar, Items)
-    ->  forall(
-            member(Item, Items),
-            (   item:value(index, Item, Index),
-                Index1 is Index+1,
-                (    item:entries(Item, Entries)
-                ->   item:update_entries(Item, Entries, Item1)
-                ;    Item1 = Item
-                ),
-            % if only using setarg, it will get out of local stack
-                nb_linkarg(Index1, Table, Item1)
-            )
-              )
-    ;   true
-    ),
+    value(Name, Grammar, Items),
+    forall(
+        member(Item, Items),
+        (   item:value(index, Item, Index),
+            Index1 is Index+1,
+            (    item:entries(Item, Entries)
+            ->   item:update_entries(Item, Entries, Item1)
+            ;    Item1 = Item
+            ),
+        % if only using setarg, it will get out of local stack
+            nb_linkarg(Index1, Table, Item1)
+        )
+          ),
     table:index(Name, TableIndex),
     TableIndex1 is TableIndex + 1,
     nb_linkarg(TableIndex1, Tables, Table),
