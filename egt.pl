@@ -37,7 +37,7 @@ read_structure(Stream) -->
 
 update(Key, Value, PrevAssoc, NewAssoc) :-
     (   get_assoc(Key, PrevAssoc, OldValue)
-    ->  append(OldValue, [Value], NewValue)
+    ->  NewValue = [Value | OldValue]
     ;   NewValue = [Value]
     ),
     put_assoc(Key, PrevAssoc, NewValue, NewAssoc).
