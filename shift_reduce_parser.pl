@@ -21,8 +21,9 @@ parse_tokens(Parser, Tokens, ProgramN) :-
     init(Parser, Program0),
     phrase(parse_tokens(Program0, ProgramN), Tokens, []).
 
-init(Parser, program(Tables, state(accept-none), ASTN)) :-
-    Parser = parser(Grammar, Tables),
+init(parser(Grammar, Tables),
+     program(Tables, state(accept-none), ASTN)
+    ) :-
     grammar:initial_states(Grammar, InitialState),
     state:current(InitialState, lalr-Lalr),
     stack:empty(AST0),
