@@ -44,9 +44,11 @@ fill_structure(Char, ValueEntries, Key, Structure) :-
     ),
     list_to_assoc(UnsortedStructure, Structure).
 
-fill_structure_rest([], _, Structure, Structure).
+fill_structure_rest([], _, Structure, Structure) :- !.
 fill_structure_rest([empty | Rest], Key) -->
+    !,
     fill_structure_rest(Rest, Key).
+
 fill_structure_rest(Rest, TableName, Structure0, Structure) :-
     findall(Type-ItemName,
             item:entry(TableName, ItemName, _, Type, _, _),

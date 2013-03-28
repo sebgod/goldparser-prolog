@@ -13,7 +13,9 @@
 :- use_module(item, []).
 
 value(Key, grammar(_H, Grammar), Value) :-
-    get_assoc(Key, Grammar, Value).
+    get_assoc(Key, Grammar, Value), !.
+
+value(_Key, _Grammar, []).
 
 counts(Grammar, Counts) :-
     value(table_counts, Grammar, [Counts]).
