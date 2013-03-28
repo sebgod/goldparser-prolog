@@ -12,8 +12,8 @@
 :- use_module(table, []).
 :- use_module(item, []).
 
-%%	value(+Key:atom, +Grammar:term, -Value:list) is semidet.
-%%	value(+Key:atom, +Grammar:term, ?Value:list) is det.
+%%	value(+Key:atom, +Grammar:term, -Value:list) is det.
+%%	value(+Key:atom, +Grammar:term, ?Value:list) is semidet.
 % retrieves the value for a given key from the grammar.
 % Currently, the grammar is using the AVL (in SWI-Prolog)
 % from library(assoc).
