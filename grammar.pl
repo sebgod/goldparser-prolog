@@ -3,8 +3,6 @@
                     counts/2,
                     properties/2,
                     initial_states/2,
-                    %items_to_list/2,
-                    %empty_tables/1,
                     tables/2
                    ]).
 
