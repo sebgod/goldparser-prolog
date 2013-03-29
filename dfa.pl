@@ -17,7 +17,7 @@ accept(DFA, Accept) :-
 
 find_edge(Charsets, DFA, Code, TargetIndex) :-
     item:entries_nd(DFA, Edge),
-    item:value(target_index, Edge, TargetIndex),
-    item:value(character_set_index, Edge, CharsetIndex),
+    item:entry_value(target_index, Edge, TargetIndex),
+    item:entry_value(character_set_index, Edge, CharsetIndex),
     table:item(Charsets, CharsetIndex, Charset),
     charset:member(Charset, Code) -> !.

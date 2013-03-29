@@ -4,15 +4,15 @@
 
 member(Charset, Code) :-
     item:entries(Charset, Ranges),
-    item:entry_size(Ranges, Size),
+    item:entries_size(Ranges, Size),
     member(Ranges, Code, 1, Size).
 
 member(Ranges, Code, Left, Right) :-
     Right >= Left,
     Middle is (Right + Left) // 2,
     arg(Middle, Ranges, Range),
-    item:value(start_character, Range, Start),
-    item:value(end_character, Range, End),
+    item:entry_value(start_character, Range, Start),
+    item:entry_value(end_character, Range, End),
     (   between(Start, End, Code)
     ->  !
     ;   Left < Right,

@@ -24,7 +24,7 @@ by_symbol(Tables, Kind-SymbolIndex, GroupIndex, Group) :-
 
 nestable(Group, NestableIndex) :-
     item:entries_nd(Group, Nested),
-    item:value(group_index, Nested, NestableIndex).
+    item:entry_value(group_index, Nested, NestableIndex).
 
 append_chars(Groups0, Characters, GroupsN) :-
     Groups0 = [group(Group, ContainerToken0, A, E) | Groups1],

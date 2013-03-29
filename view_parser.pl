@@ -45,13 +45,13 @@ display_rules(parser(_G, Tables), From, To) :-
 display_production(Tables, Rule, From, To) :-
     display_rule(From, Tables, Rule),
     item:entries_nd(Rule, Symbol),
-    item:value(symbol, Symbol, SymbolIndex),
+    item:entry_value(symbol_index, Symbol, SymbolIndex),
     display_symbol(To, Tables, SymbolIndex).
 
 
 display_lalr_action(Tables, LalrIndex, Name, Action, From, To) :-
-    item:value(target, Action, Target),
-    item:value(symbol_index, Action, SymbolIndex),
+    item:entry_value(target, Action, Target),
+    item:entry_value(symbol_index, Action, SymbolIndex),
     (    format(atom(From), 'lalr-~d', [LalrIndex]),
          format(atom(To), '~w ~d -> ~d',
                 [Name, LalrIndex, Target])

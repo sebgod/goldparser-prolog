@@ -86,9 +86,9 @@ symbol_to_action(SymbolTypeName, SymbolIndex,
                  Actions, ActionName, Target) :-
     memberchk(SymbolTypeName, [terminal, eof, nonterminal]),
     action:find(Actions, SymbolIndex, FoundAction),
-    item:value(action, FoundAction, ActionType),
+    item:entry_value(action, FoundAction, ActionType),
     action:type(ActionType, ActionName),
-    item:value(target, FoundAction, Target).
+    item:entry_value(target, FoundAction, Target).
 
 perform(skip, _Target, P, P) --> [_Skipped].
 
@@ -111,7 +111,7 @@ perform(reduce, Target,
     ->  RuleSymbols = RuleEntries
     ;   RuleSymbols = []
     ),
-    item:entry_size(RuleSymbols, RuleSymbolSize),
+    item:entries_size(RuleSymbols, RuleSymbolSize),
     stack:rpop(AST0, RuleSymbolSize, Handles, AST1),
     item:value(name, Head, HeadName),
     Reduction =.. [HeadName | Handles],

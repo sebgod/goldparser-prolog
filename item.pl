@@ -1,20 +1,15 @@
 :- module(item, [
                  property/6,
-                 entry/6,
-                 empty/1,
+                 entry_value/3,
+                 entry_value/6,
                  value/3,
                  entries/2,
-                 update_value/4,
-                 update_entries/3,
+                 entries/3,
                  entries_to_list/2,
                  entry_member/2,
                  entries_nd/2,
-                 entry_size/2,
-                 merge_keep/3,
-                 merge_replace/3
+                 entries_size/2
                 ]).
-
-:- use_module(library(assoc)).
 
 property(character_set_table, index,          0, short, item(V, _, _, _E), V).
 property(character_set_table, unicode_plane,  1, short, item(_, V, _, _E), V).
@@ -55,36 +50,48 @@ property(table_counts, dfa_table,           3, short, item(_, _, _, V, _, _), V)
 property(table_counts, lalr_table,          4, short, item(_, _, _, _, V, _), V).
 property(table_counts, group_table,         5, short, item(_, _, _, _, _, V), V).
 
-entry(rule_table, symbol, 0, short, entry(V), V).
+entries(rule_table,  item(_, _, E), E).
+entries(lalr_table,  item(_, E), E).
+entries(dfa_table,   item(_, _, _, E), E).
+entries(character_set_table, item(_, _, _, E), E).
+entries(group_table, item(_, _, _, _, _, _, _, E), E).
 
-entry(lalr_table, symbol_index, 0, short, entry(V, _, _), V).
-entry(lalr_table, action,       1, short, entry(_, V, _), V).
-entry(lalr_table, target,       2, short, entry(_, _, V), V).
+entry_value(rule_table, symbol_index, 0, short, entry(V), V).
 
-entry(dfa_table, character_set_index, 0, short, entry(V, _), V).
-entry(dfa_table, target_index,        1, short, entry(_, V), V).
+entry_value(lalr_table, symbol_index, 0, short, entry(V, _, _), V).
+entry_value(lalr_table, action,       1, short, entry(_, V, _), V).
+entry_value(lalr_table, target,       2, short, entry(_, _, V), V).
 
-entry(character_set_table, start_character, 0, short, entry(V, _), V).
-entry(character_set_table, end_character,   1, short, entry(_, V), V).
+entry_value(dfa_table, character_set_index, 0, short, entry(V, _), V).
+entry_value(dfa_table, target_index,        1, short, entry(_, V), V).
 
-entry(group_table, group_index, 0, short, entry(V), V).
+entry_value(character_set_table, start_character, 0, short, entry(V, _), V).
+entry_value(character_set_table, end_character,   1, short, entry(_, V), V).
 
-empty(Item) :-
-    empty_assoc(Item).
+entry_value(group_table, group_index, 0, short, entry(V), V).
+
+%%	value(+Name:atom, +Item:term, -Value) is det.
+value(Name, Item, Value) :-
+    property(_, Name, _, _, Item, Value), !.
 
 value(Name, Item, Value) :-
-    get_assoc(Name, Item, Value).
+    var(Value),
+    !,
+    domain_error(Item, Name).
 
-update_value(Name, Item, Value, NewItem) :-
-    put_assoc(Name, Item, Value, NewItem).
+%%	entry_value(+Name:atom, +Entry:term, -Value) is det.
+entry_value(Name, Entry, Value) :-
+    entry_value(_, Name, _, _, Entry, Value), !.
+
+entry_value(Name, Entry, Value) :-
+    var(Value),
+    !,
+    domain_error(Entry, Name).
 
 entries(Item, Entries) :-
-    value('_entries', Item, Entries).
+    functor(Item, _, Size),
+    arg(Size, Item, Entries).
 
-update_entries(Item, Entries, NewItem) :-
-    must_be(list, Entries),
-    EntryTerm =.. [entries | Entries],
-    update_value('_entries', Item, EntryTerm, NewItem).
 
 %%	entries_to_list(+EntryTerm:term, ?Entries:list) is det.
 % converts the term entry to a list of entries (using univ).
@@ -102,21 +109,11 @@ entries_nd(Item, Entry) :-
     entries(Item, Entries),
     entry_member(Entries, Entry).
 
-entry_size(Entries, Size) :-
+entries_size(Entries, Size) :-
     functor(Entries, entries, Size), !.
 
-entry_size(Entries, Size) :-
+entries_size(Entries, Size) :-
     length(Entries, Size), !.
-
-merge_keep(Key-Value, Item0, ItemN) :-
-    (   value(Key, Item0, _Keep)
-    ->  ItemN = Item0
-    ;   update_value(Key, Item0, Value, ItemN)
-    ).
-
-merge_replace(Key-Value, Item0, ItemN) :-
-    update_value(Key, Item0, Value, ItemN).
-
 
 
 

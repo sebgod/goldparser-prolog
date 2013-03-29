@@ -51,7 +51,7 @@ fill_structure_rest([empty | Rest], Key) -->
 
 fill_structure_rest(Rest, TableName, Structure0, Structure) :-
     findall(Type-ItemName,
-            item:entry(TableName, ItemName, _, Type, _, _),
+            item:entry_value(TableName, ItemName, _, Type, _, _),
             Typings),
     list_trim(Typings, Rest, Trimmed, Next),
     maplist(fill_structure_acc, Typings, Trimmed, UnsortedRecord),

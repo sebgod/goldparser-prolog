@@ -50,31 +50,56 @@ tables(Grammar, Tables) :-
 
 tables(_Grammar, _, []).
 
-tables(Grammar, Tables, [Name-Size | Rest]) :-
+tables(Grammar, Tables, [TableName-Size | Rest]) :-
     number(Size),
-    functor(Table, Name, Size),
-    value(Name, Grammar, Items),
+    functor(Table, TableName, Size),
+    value(TableName, Grammar, GrammarItems),
     forall(
-        member(Item, Items),
-        (   item:value(index, Item, Index),
+        member(GrammarItem, GrammarItems),
+        (   item_to_term(TableName, GrammarItem, TableItem),
+            item:value(index, TableItem, Index),
             Index1 is Index+1,
-            (    item:entries(Item, Entries)
-            ->   item:update_entries(Item, Entries, Item1)
-            ;    Item1 = Item
-            ),
         % if only using setarg, it will get out of local stack
-            nb_linkarg(Index1, Table, Item1)
+            nb_linkarg(Index1, Table, TableItem)
         )
           ),
-    table:index(Name, TableIndex),
+    table:index(TableName, TableIndex),
     TableIndex1 is TableIndex + 1,
     nb_linkarg(TableIndex1, Tables, Table),
     tables(Grammar, Tables, Rest).
 
+item_to_term(TableName, GrammarItem, TableItem) :-
+    item:property(TableName, _, _, _, TableItem, _),
+    forall(item:property(TableName, Key, Index, _, _, _),
+           (   Arg is Index + 1,
+               get_assoc(Key, GrammarItem, Value),
+               nb_linkarg(Arg, TableItem, Value)
+           )
+          ),
+    entries_to_term(TableName, GrammarItem, TableItem).
 
+entries_to_term(_TableName, _GrammarItem, TableItem) :-
+    ground(TableItem), !.
 
+entries_to_term(TableName, GrammarItem, TableItem) :-
+    (   get_assoc('_entries', GrammarItem, Entries)
+    ->  length(Entries, NumberOfEntries),
+        functor(EntriesTerm, entries, NumberOfEntries),
+        foldl(entry_to_term(TableName, EntriesTerm), Entries, 1, _)
+    ;   EntriesTerm = entries
+    ),
+    functor(TableItem, _, Arity),
+    nb_linkarg(Arity, TableItem, EntriesTerm).
 
-
-
+entry_to_term(TableName, EntriesTerm, EntryAssoc, EntryIndex, EntryIndex1) :-
+    EntryIndex1 is EntryIndex + 1,
+    item:entry_value(TableName, _, _, _, EntryTerm, _),
+    forall(item:entry_value(TableName, Key, Index, _, _, _),
+           (   Arg is Index + 1,
+               get_assoc(Key, EntryAssoc, Value),
+               nb_linkarg(Arg, EntryTerm, Value)
+           )
+          ),
+    nb_linkarg(EntryIndex, EntriesTerm, EntryTerm).
 
 
