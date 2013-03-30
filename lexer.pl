@@ -99,24 +99,31 @@ scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
     lookahead(Lexer, LookaheadN),
     scan_input(Lexer, LookaheadN, Token, Groups1, GroupsN).
 
-within_group(_Lexer, character, _Lookahead, Groups0, GroupsN) -->
-     [Input],
-     !,
-     { char_and_code(Input, Character, _Code),
-       group:append_chars(Groups0, Character, GroupsN)
-     }.
+within_group(_Lexer, character, Lookahead, Groups0, GroupsN) -->
+    { Lookahead \= _-eof,
+      symbol:characters(Lookahead, Chars),
+      Groups0 = [ group(_, _, _, _, _EndIndex) | _ ]
+    },
+    !,
+    advance(Lookahead),
+    { group:append_chars(Groups0, Chars, GroupsN) }.
 
+within_group(_Lexer, character, _Lookahead, Groups0, GroupsN) -->
+    [Input],
+    !,
+    { char_and_code(Input, Character, _Code),
+      group:append_chars(Groups0, Character, GroupsN)
+    }.
+
+% TODO: unsure about the behaviour of Lookahead = _-eof
 within_group(_Lexer, token, Lookahead, Groups0, GroupsN) -->
-     advance(Lookahead),
+     { symbol:characters(Lookahead, Chars) },
      !,
-     { group:append_chars(Groups0, Lookahead, GroupsN) }.
+     advance(Lookahead),
+     { group:append_chars(Groups0, Chars, GroupsN) }.
 
 within_group(_, AdvanceMode, _, _, _) -->
-    { throw(error('Unhandled advance mode',
-                  context(analyze_lexical_group//4, AdvanceMode)
-                 )
-           )
-    }.
+    { must_be(oneof([token, character]), AdvanceMode) }.
 
 advance(Token) -->
     { Token = _SymbolIndex-Data,
