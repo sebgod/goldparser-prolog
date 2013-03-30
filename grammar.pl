@@ -7,6 +7,7 @@
                    ]).
 
 :- use_module(library(assoc)).
+:- use_module(support).
 :- use_module(table, []).
 :- use_module(item, []).
 
@@ -83,7 +84,7 @@ entries_to_term(TableName, GrammarItem, TableItem) :-
     (   get_assoc('_entries', GrammarItem, Entries)
     ->  length(Entries, NumberOfEntries),
         functor(EntriesTerm, entries, NumberOfEntries),
-        foldl(entry_to_term(TableName, EntriesTerm), Entries, 1, _)
+        iterate_list(entry_to_term(TableName, EntriesTerm), Entries)
     ;   EntriesTerm = entries
     ),
     functor(TableItem, _, Arity),
@@ -98,6 +99,6 @@ entry_to_term(TableName, EntriesTerm, EntryAssoc, EntryIndex, EntryIndex1) :-
                nb_linkarg(Arg, EntryTerm, Value)
            )
           ),
-    nb_linkarg(EntryIndex, EntriesTerm, EntryTerm).
+    nb_linkarg(EntryIndex1, EntriesTerm, EntryTerm).
 
 

@@ -6,10 +6,12 @@
                     safe_open_file/2,
                     safe_open_file/3,
                     must_be_assoc/1,
-                    diff_list_append/3
+                    diff_list_append/3,
+                    iterate_list/2
                    ]).
 
 :- meta_predicate
+    iterate_list(3, +),
     safe_open_file(+, 1),
     safe_open_file(+, 1, +).
 
@@ -62,3 +64,14 @@ safe_open_file(File, StreamParser, Options) :-
                       ).
 
 diff_list_append(A-B, B-C, A-C).
+
+iterate_list(Goal, List) :-
+    foldl(Goal, List, 0, _).
+
+
+
+
+
+
+
+
