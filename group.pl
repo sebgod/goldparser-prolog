@@ -27,6 +27,6 @@ nestable(Group, NestableIndex) :-
     item:entry_value(group_index, Nested, NestableIndex).
 
 append_chars(Groups0, Appendee, GroupsN) :-
-    Groups0 = [group(Group, ContainerToken0, A, E) | Groups1],
+    Groups0 = [group(Group, ContainerToken0, AM, EM, EC) | Groups1],
     symbol:append(ContainerToken0, Appendee, ContainerToken1),
-    GroupsN = [group(Group, ContainerToken1, A, E) | Groups1 ].
+    GroupsN = [group(Group, ContainerToken1, AM, EM, EC) | Groups1 ].

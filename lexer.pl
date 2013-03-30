@@ -67,14 +67,15 @@ scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
      item:value(container_index, Group, ContainerIndex),
      symbol:token(Tables, ContainerIndex, GroupStart, ContainerToken),
      (   (   Groups0 = []
-         ;   Groups0 = [group(Top, _, _, _) | _],
+         ;   Groups0 = [group(Top, _, _, _, _) | _],
              group:nestable(Top, SymbolIndex)
          )
      ->  item:value(advance_mode, Group, AdvanceIndex),
          item:value(ending_mode, Group, EndingIndex),
+         item:value(end_index, Group, EndIndex),
          group:advance_mode(AdvanceIndex, AdvanceMode),
          group:ending_mode(EndingIndex, EndingMode),
-         GroupRec = group(Group, ContainerToken, AdvanceMode, EndingMode),
+         GroupRec = group(Group, ContainerToken, AdvanceMode, EndingMode, EndIndex),
          Groups1 = [GroupRec | Groups0]
      ;   Groups1 = Groups0
      )
@@ -83,12 +84,9 @@ scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
     scan_input(Lexer, LookaheadN, Token, Groups1, GroupsN).
 
 scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
-    { Groups0 = [ group(Top, Token0, AdvanceMode, EndingMode) | GroupsR] },
+    { Groups0 = [ group(_, Token0, AdvanceMode, EndingMode, EndIndex) | GroupsR] },
     !,
-    (   {
-          Lookahead0 = SymbolIndex-_,
-          item:value(end_index, Top, SymbolIndex)
-        }
+    (   { Lookahead0 = EndIndex-_ }
     ->  {  Token = Token0,
            Groups1 = GroupsR
         },
