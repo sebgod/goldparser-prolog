@@ -76,11 +76,16 @@ token(Tables, SymbolIndex, Chars, SymbolIndex-Token) :-
     ;   true
     ).
 
-append(SymbolIndex-Data0, Chars, SymbolIndex-DataN) :-
+append(SymbolIndex-Data0, Appendee, SymbolIndex-DataN) :-
     functor(Data0, Name, Args),
     functor(DataN, Name, Args),
     (   Args > 0
     ->  arg(1, Data0, Chars0),
+        (   atom(Appendee)
+        ->  Chars = Appendee
+        ;   functor(DataA, _, Args),
+            arg(1, DataA, Chars)
+        ),
         atom_concat(Chars0, Chars, CharsN),
         arg(1, DataN, CharsN)
     ;   true
