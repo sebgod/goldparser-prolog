@@ -83,13 +83,14 @@ scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
     scan_input(Lexer, LookaheadN, Token, Groups1, GroupsN).
 
 scan_input(Lexer, Lookahead0, Token, Groups0, GroupsN) -->
-    { Groups0 = [ group(Top, _, AdvanceMode, _) | _] },
+    { Groups0 = [ group(Top, Token0, AdvanceMode, EndingMode) | GroupsR] },
     !,
     (   {
           Lookahead0 = SymbolIndex-_,
           item:value(end_index, Top, SymbolIndex)
         }
-    ->  {  Groups0 = [group(_, Token, _, EndingMode) | Groups1]
+    ->  {  Token = Token0,
+           Groups1 = GroupsR
         },
         (   { EndingMode = closed }
         ->  advance(Lookahead0)
