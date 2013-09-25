@@ -1,0 +1,57 @@
+﻿// portray_clause(Stream, Term) :-
+    \+ \+ ( copy_term_nat(Term, Copy),
+        numbervars(Copy, 0, _,
+               [ singletons(true)
+               ]),
+        do_portray_clause(Stream, Copy)
+          ).
+
+
+
+4 is an element of integer numbers,
+A = 5d + 2s / 10!(cm²) * 5s + 5G.
+
+hello_world("hello", world).
+
+A unifies with hello_world( -( 3 plus Var ) ^ Var ^ 3 ).
+
+/** The following block quote shows how to use block quote, if there is an inline * or /, please use /** instead of /*
+
+/ you can leave blank lines within a block quote, and you can start with either / or *, but you cannot end a line with the
+* comment block close: */
+
+ * Such that nested block quotes are actually possible
+
+ */
+B unifies with atomLiteral concat "Verbatim" concat 3 & `Backtick "string"` & `escaped `` backtick` & 'single quot \' escaped',
+ComplexAdd = (2 + 3i) * (2 - 3i),
+Six unifies with ( 3 * 2 ) and
+Integer = 0X232,
+Binary = 0b010100010010001,
+Decimal = 312.3434,
+Complex = 32.3 + 32.0i,
+Complex = 5.3 - 2.2i,
+Inf = negative infinity,
+Square = (2²) ^ 3 ,
+C unifies with 3 format %d,
+Complex = -3.3 + 32i,
+!,
+:fail,
+A does not unify with B,
+not(A unifies with 3),
+List = [1, 2, 3, 4 | []],
+RealPart = re (2 + 3i),
+ImagPart = ℑ(4 + 1i).
+For = [X from X in real numbers where X + 3],
+FiniteRange = [X from X in r(2 .. 3] ],
+Seq = [X from X in integer where X + 1],
+Matrix = #{[3, 3, 3], [1, 1, 2 + 2i]},
+SingleItemList = [1!(m/s²) ].
+
+{2} = {1,2,3} intersect {2,5,6},
+while X in r[1 .. 2) do (A = X + 1).
+
+X = [A, B, C] as :list of (:list of :int),
+VectorType = (:int, :int),
+Vector = ( (1, 2), (0, 2) ) as :vector of VectorType.
+

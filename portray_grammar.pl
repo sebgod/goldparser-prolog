@@ -17,13 +17,14 @@ user:portray(parser_step(_P0, _P1, Action, Value, Lalr)) :-
 
 user:portray(Grammar) :-
     Grammar = grammar(header(Header), _Assoc),
-    grammar:properties(Grammar, Props),
+    /*grammar:properties(Grammar, Props),
     forall(member(Property, Props),
           (   item:value(name, Property, Name),
               item:value(value, Property, Value),
               format(' ~w: ~w', [Name, Value])
           )
           ),
+   */
     format(' version: ~w', [Header]).
 
 user:portray(tables(_, _, _, _, _, _, _)) :-
