@@ -10,8 +10,8 @@
 :- use_module(table, []).
 :- use_module(item, []).
 
-%%  type(+Number:int, +Name:atom) is semidet.
-%%  type(?Number:int, ?Name:atom) is nondet.
+%%  type(+Number:int, +Name:atom, +Args:int) is semidet.
+%%  type(?Number:int, ?Name:atom, ?Args:int) is nondet.
 %
 % Represents the symbol types used in the gold parser version 5.0.
 %
